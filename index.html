@@ -56,7 +56,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 </style>
 </head>
 <body>
-<header><h1>勉強記録タイマー</h1><p>v13.3：タブ分け最優先・Firebase同期・科目/教材候補・教材進捗調整</p></header>
+<header><h1>勉強記録タイマー</h1><p>v13.4：分析エラー修正・タブ分け維持・Firebase同期</p></header>
 
 <section class="dashboard">
   <div class="stack">
@@ -352,7 +352,29 @@ function addManual(){let d=$("mDate").value,st=$("mStart").value,en=$("mEnd").va
 function sourceJa(x){return x==="manual"?"手動追加":x==="stopwatch"?"ストップウォッチ":x==="timer_manual"?"途中記録":"ポモドーロ"}
 function toast(msg){let t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
 function escHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function renderAll(){renderToday();renderGrowth();renderSubjectRanks();renderQuests();renderWeekly();renderGrowthCompare();renderWorldLog();renderMaterials();renderDatalists();renderTarget();renderSearch()}
+function safeRender(name,fn){
+  try{fn()}
+  catch(e){
+    console.error(`${name} render error`,e);
+    const fallback={renderWeekly:"weeklyReport",renderGrowthCompare:"growthCompare",renderWorldLog:"worldLog",renderMaterials:"materialProgress",renderSubjectRanks:"subjectRanks",renderQuests:"quests"}[fn.name];
+    if(fallback&&$(fallback))$(fallback).innerHTML=`<div class="small">${name}の表示でエラーが出ました。記録データは残っています。</div>`;
+  }
+}
+function renderAll(){
+  [
+    ["今日の記録",renderToday],
+    ["成長ステータス",renderGrowth],
+    ["科目ランク",renderSubjectRanks],
+    ["クエスト",renderQuests],
+    ["週間レポート",renderWeekly],
+    ["最近の成長",renderGrowthCompare],
+    ["ログ解析",renderWorldLog],
+    ["教材進捗",renderMaterials],
+    ["入力候補",renderDatalists],
+    ["目標時間",renderTarget],
+    ["検索",renderSearch]
+  ].forEach(([name,fn])=>safeRender(name,fn));
+}
 function recordParts(r){let parts=[`${tt(r.startAt)}〜${tt(r.endAt)}`,sourceJa(r.source)];if(r.material)parts.push(r.material);if(r.understanding)parts.push(`理解度 ${r.understanding}`);if(r.understanding==="△"||r.understanding==="×")parts.push(r.reviewed?"復習済み":"未復習");parts.push(`集中度 ${r.focusLevel}（${ftext(r.focusLevel)}）`);if(r.pages)parts.push(`${r.pages}ページ`);if(r.problems)parts.push(`${r.problems}問`);if(r.materialTotal)parts.push(`教材全体 ${r.materialTotal}`);parts.push(`経験値 +${r.xp}`);if(r.goal)parts.push(`目標: ${r.goal}`);if(r.memo)parts.push(r.memo);return parts}
 function reviewButtonHTML(r){if(!(r.understanding==="△"||r.understanding==="×"))return"";return r.reviewed?`<button data-review="${r.id}">復習未完に戻す</button>`:`<button data-review="${r.id}">復習済みにする</button>`}
 function recordHTML(r,showDate=false){let date=showDate?`${r.date}　`:"";let tag="";if(r.understanding==="△"||r.understanding==="×")tag=r.reviewed?` <span class="reviewedtag">復習済み</span>`:` <span class="reviewtag">未復習</span>`;return `<div class="record"><div class="rtop"><strong>${date}${subLabel(r.subject)}　${fdur(r.durationSec)}${tag}</strong><div><button data-del="${r.id}">削除</button>${reviewButtonHTML(r)}</div></div><div class="rsub">${escHTML(recordParts(r).join(" / "))}</div></div>`}
@@ -374,6 +396,104 @@ function nextStreakText(st){let marks=[3,7,14,30,50,100,200],n=marks.find(x=>x>s
 function comment(min,tr){if(min>=360)return"今日は6時間以上。かなり強い学習日です。";if(min>=240)return"Aランク到達。良い密度です。";if(min>=120)return"2時間突破。次は不足科目クエストを回収できます。";if(min>=60)return"1時間突破。記録が積み上がっています。";if(tr.length)return"記録開始できています。次は合計60分を狙えます。";return"まず1セット記録してみましょう。"}
 function rankInfo(sub,xp){let names=subjectRankNames[sub]||subjectRankNames["その他"],idx=0;for(let i=0;i<rankThresholds.length;i++){if(xp>=rankThresholds[i])idx=i}let next=rankThresholds[idx+1]??null;return{idx,name:names[Math.min(idx,names.length-1)],next,prev:rankThresholds[idx]}}
 function subjectXpMap(){let m={};subjects.forEach(s=>m[s]=0);records().forEach(r=>m[r.subject]=(m[r.subject]||0)+Number(r.xp||0));return m}
+
+
+function recentSubjectMinutes(days=7){
+  let map={};coreSubjects.forEach(s=>map[s]=0);
+  let border=new Date();border.setDate(border.getDate()-days+1);border.setHours(0,0,0,0);
+  records().forEach(r=>{
+    let d=new Date(r.startAt);
+    if(d>=border && map[r.subject]!=null) map[r.subject]+=Math.round(r.durationSec/60);
+  });
+  return map;
+}
+function weakSubjectCounts(days=14){
+  let map={};coreSubjects.forEach(s=>map[s]=0);
+  let border=new Date();border.setDate(border.getDate()-days+1);border.setHours(0,0,0,0);
+  records().forEach(r=>{
+    let d=new Date(r.startAt);
+    if(d>=border && map[r.subject]!=null && (r.understanding==="△"||r.understanding==="×")) map[r.subject]++;
+  });
+  return map;
+}
+function todaySubjectMinutes(){
+  let map={};coreSubjects.forEach(s=>map[s]=0);
+  records().filter(r=>r.date===dkey()).forEach(r=>{
+    if(map[r.subject]!=null) map[r.subject]+=Math.round(r.durationSec/60);
+  });
+  return map;
+}
+function subjectState(sub, recentMin, weakCount, todayMin){
+  if(todayMin>0) return "本日進行中";
+  if(weakCount>0) return "弱点回収候補";
+  if(recentMin===0) return "要再開";
+  if(recentMin<45) return "不足";
+  if(recentMin>=180) return "成長中";
+  return "安定";
+}
+function subjectComment(sub,state){
+  const base={
+    数学:"方針選択と条件整理を育てる科目です。",
+    英語:"語彙・構文・読解速度を積み上げる科目です。",
+    物理:"現象を式に変換する力を育てる科目です。",
+    化学:"定義・計算・反応の接続を固める科目です。",
+    国語:"文章構造と古漢の型を整える科目です。",
+    地理:"統計・地形・地域比較を接続する科目です。",
+    情報:"処理手順とデータの読み取りを鍛える科目です。",
+    その他:"必要な学習を補助する枠です。"
+  };
+  if(state==="弱点回収候補") return `弱点候補があります。${base[sub]||base["その他"]}`;
+  if(state==="要再開") return `最近少なめです。${base[sub]||base["その他"]}`;
+  return base[sub]||base["その他"];
+}
+function renderSubjectRanks(){
+  let box=$("subjectRanks");if(!box)return;
+  let xp=subjectXpMap(),recent=recentSubjectMinutes(7),weak=weakSubjectCounts(14),today=todaySubjectMinutes();
+  let list=[...new Set([...coreSubjects,...existingSubjects()])];
+  list=list.filter(Boolean).sort((a,b)=>(xp[b]||0)-(xp[a]||0) || subjects.indexOf(a)-subjects.indexOf(b));
+  box.innerHTML="";
+  if(!list.length){box.innerHTML='<div class="small">記録が増えると科目ランクが表示されます。</div>';return}
+  list.forEach(sub=>{
+    let info=rankInfo(sub,xp[sub]||0),nextLeft=info.next==null?0:Math.max(0,info.next-(xp[sub]||0)),pct=info.next==null?100:Math.min(100,((xp[sub]||0)-info.prev)/(info.next-info.prev)*100);
+    let st=subjectState(sub,recent[sub]||0,weak[sub]||0,today[sub]||0);
+    box.insertAdjacentHTML("beforeend",`<div class="subrank"><div class="subtop"><strong>${subLabel(sub)} ${escHTML(info.name)}</strong><span>${xp[sub]||0}XP</span></div><div class="barwrap"><div class="bar" style="width:${Math.max(3,pct)}%"></div></div><div class="small">次まで ${info.next==null?"最終ランク域":`${nextLeft}XP`} / 状態：${st}</div><div class="small">${escHTML(subjectComment(sub,st))}</div></div>`);
+  });
+}
+function makeQuests(){
+  let recent=recentSubjectMinutes(7),weak=weakSubjectCounts(14),today=todaySubjectMinutes();
+  let todayTotal=Math.round(records().filter(r=>r.date===dkey()).reduce((s,r)=>s+r.durationSec,0)/60);
+  let unreviewed=records().filter(r=>(r.understanding==="△"||r.understanding==="×")&&!r.reviewed).length;
+  let least=coreSubjects.slice().sort((a,b)=>(recent[a]||0)-(recent[b]||0))[0]||"数学";
+  let untouched=coreSubjects.find(s=>(recent[s]||0)===0) || least;
+  let weakTop=coreSubjects.slice().sort((a,b)=>(weak[b]||0)-(weak[a]||0))[0]||least;
+  let q=[
+    {type:"未踏クエスト",title:`${untouched}の記録を30分残す`,detail:`内容：${untouched}を30分記録`,done:(today[untouched]||0)>=30,xp:35},
+    {type:"補給クエスト",title:`合計180分の学習ログを残す`,detail:"内容：今日の合計学習時間を180分以上にする",done:todayTotal>=180,xp:50},
+    {type:"調整クエスト",title:`最近少ない${least}を30分補強する`,detail:`内容：${least}を30分記録`,done:(today[least]||0)>=30,xp:35}
+  ];
+  if((weak[weakTop]||0)>0){
+    q.push({type:"弱点回収任務",title:`${weakTop}の弱点候補に触れる`,detail:`内容：${weakTop}を30分記録、または未復習を減らす`,done:(today[weakTop]||0)>=30||unreviewed===0,xp:45});
+  }else{
+    q.push({type:"安定化任務",title:"△/×を1つ記録して弱点を見える化する",detail:"内容：理解度△または×の記録を1つ残す",done:records().some(r=>r.date===dkey()&&(r.understanding==="△"||r.understanding==="×")),xp:30});
+  }
+  return q;
+}
+function renderQuests(){
+  let box=$("quests");if(!box)return;
+  let qs=makeQuests(),todo=qs.filter(q=>!q.done),done=qs.filter(q=>q.done);
+  box.innerHTML="";
+  if(todo.length){
+    box.insertAdjacentHTML("beforeend",`<div class="questSectionTitle">未達成クエスト</div>`);
+    todo.forEach(q=>box.insertAdjacentHTML("beforeend",questHTML(q)));
+  }
+  if(done.length){
+    box.insertAdjacentHTML("beforeend",`<div class="questSectionTitle">達成済み</div>`);
+    done.forEach(q=>box.insertAdjacentHTML("beforeend",questHTML(q)));
+  }
+}
+function questHTML(q){
+  return `<div class="quest ${q.done?"done":""}"><div class="check">${q.done?"✓":""}</div><div><strong>${escHTML(q.type)}：${escHTML(q.title)}</strong><div class="small">${escHTML(q.detail)}</div></div><div class="qxp">+${q.xp}XP</div></div>`;
+}
 
 function lastNDaysRecords(days=7){let border=new Date();border.setDate(border.getDate()-days+1);border.setHours(0,0,0,0);return records().filter(r=>new Date(r.startAt)>=border)}
 function renderWeekly(){let box=$("weeklyReport");if(!box)return;let wr=lastNDaysRecords(7),totalMin=Math.round(wr.reduce((s,r)=>s+r.durationSec,0)/60),weak=wr.filter(r=>r.understanding==="△"||r.understanding==="×").length,days=new Set(wr.map(r=>r.date)).size,subMin={};subjects.forEach(s=>subMin[s]=0);wr.forEach(r=>subMin[r.subject]=(subMin[r.subject]||0)+Math.round(r.durationSec/60));let entries=Object.entries(subMin).filter(([s,m])=>m>0).sort((a,b)=>b[1]-a[1]);let top=entries[0]?[`${entries[0][0]} ${fm(entries[0][1])}`]:"なし";let least=coreSubjects.slice().sort((a,b)=>(subMin[a]||0)-(subMin[b]||0))[0]||"なし";let avgFocus=wr.length?(wr.reduce((s,r)=>s+Number(r.focusLevel||3),0)/wr.length).toFixed(1):"-";let bestFocus="-";if(wr.length){let f={};wr.forEach(r=>{if(!f[r.subject])f[r.subject]=[];f[r.subject].push(Number(r.focusLevel||3))});bestFocus=Object.entries(f).map(([s,a])=>[s,a.reduce((x,y)=>x+y,0)/a.length]).sort((a,b)=>b[1]-a[1])[0][0]}box.innerHTML=`<div class="reportitem"><strong>${fm(totalMin)}</strong><span class="small">今週の合計</span></div><div class="reportitem"><strong>${days}/7日</strong><span class="small">学習日数</span></div><div class="reportitem"><strong>${top}</strong><span class="small">一番多い科目</span></div><div class="reportitem"><strong>${least}</strong><span class="small">少なめ候補</span></div><div class="reportitem"><strong>${weak}件</strong><span class="small">△/×の記録</span></div><div class="reportitem"><strong>${avgFocus}</strong><span class="small">平均集中度</span></div><div class="reportitem"><strong>${bestFocus}</strong><span class="small">集中度が高い科目</span></div>`}
@@ -508,7 +628,7 @@ function initSubjects(){subjects.forEach(sub=>{let b=document.createElement("but
 setupLayoutTabs();
 $("start").onclick=()=>run?stop():start();$("reset").onclick=reset;$("save").onclick=saveNow;$("tabPom").onclick=()=>setTool("pom");$("tabSw").onclick=()=>setTool("sw");$("manualAdd").onclick=addManual;$("csvLog").onclick=exportLog;$("csvCal").onclick=exportCal;$("focusView").onclick=openFocus;$("focusClose").onclick=closeFocus;$("backupExport").onclick=exportBackup;$("backupImportBtn").onclick=()=>$("backupImport").click();$("backupImport").onchange=e=>importBackupFile(e.target.files[0]);$("applyTarget").onclick=()=>setTargetMinutes($("customTarget").value);if($("claimGoalBonus"))$("claimGoalBonus").onclick=claimGoalBonus;document.querySelectorAll("[data-target]").forEach(b=>b.onclick=()=>setTargetMinutes(b.dataset.target));$("searchInput").oninput=renderSearch;if($("themeSelect"))$("themeSelect").onchange=()=>saveTheme($("themeSelect").value);$("searchClear").onclick=()=>{$("searchInput").value="";renderSearch()};$("showEndSummary").onclick=renderEndSummary;$("clear").onclick=()=>{if(confirm("すべての記録を削除します。元に戻せません。")){localStorage.removeItem(KEY);localStorage.removeItem(BONUS);localStorage.removeItem(MATERIAL);queueCloudSave();renderAll()}};if($("authLogin"))$("authLogin").onclick=authLogin;if($("authSignup"))$("authSignup").onclick=authSignup;if($("authLogout"))$("authLogout").onclick=authLogout;if($("syncPull"))$("syncPull").onclick=manualPullCloud;if($("syncPush"))$("syncPush").onclick=manualPushCloud;document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));["focusMin","shortMin","longMin","customMin","longEvery","sound","autoNext"].forEach(id=>$(id).onchange=()=>{saveSet();if(!run&&tool==="pom")setMode(mode)});["subject","material","focusLevel"].forEach(id=>$(id).addEventListener("input",updateFocusOverlay));["subject","material"].forEach(id=>$(id).addEventListener("change",()=>applyKnownMaterialToForm("")));["mSubject","mMaterial"].forEach(id=>$(id).addEventListener("change",()=>applyKnownMaterialToForm("m")));
 initFirebaseSync();setupPwa();loadSet();if($("themeSelect")){let th=getSetObj().theme||"standard";$("themeSelect").value=th;applyTheme(th)}if($("customTarget"))$("customTarget").value=getTargetMinutes();initSubjects();
-renderDatalists();$("mDate").value=dkey();$("mStart").value=`${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;$("mEnd").value=`${pad(new Date(Date.now()+3600000).getHours())}:${pad(new Date(Date.now()+3600000).getMinutes())}`;setMode("focus");try{renderAll()}catch(e){console.error(e);toast("一部の表示更新でエラーが出ました。記録機能は使えます。")};setInterval(updateFocusOverlay,1000);
+renderDatalists();$("mDate").value=dkey();$("mStart").value=`${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;$("mEnd").value=`${pad(new Date(Date.now()+3600000).getHours())}:${pad(new Date(Date.now()+3600000).getMinutes())}`;setMode("focus");try{renderAll()}catch(e){console.error(e);toast("表示更新を再試行しました。記録機能は使えます。")};setInterval(updateFocusOverlay,1000);
 </script>
 </body>
 </html>
