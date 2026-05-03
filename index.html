@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Study RPG">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>勉強記録タイマー v13.3 Tabs First</title>
+<title>勉強記録タイマー v13.6</title>
 <style>
 :root{--bg:#f5f6f8;--card:#fff;--text:#1f2937;--sub:#6b7280;--main:#2563eb;--border:#e5e7eb;--danger:#dc2626;--good:#16a34a;--warn:#b45309;--shadow:0 10px 30px rgba(15,23,42,.08);--radius:22px}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}header{text-align:center;padding:24px 18px 10px}h1{margin:0;font-size:28px;letter-spacing:.04em}header p{margin:8px 0 0;color:var(--sub);font-size:14px}
@@ -53,10 +53,13 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
 .matControls input{padding:8px 10px;border-radius:10px;font-size:14px}
 @media(max-width:560px){.matControls{grid-template-columns:1fr}}
 
+.pickSelect{margin-bottom:8px;background:#f9fafb;font-weight:800;color:var(--text)}
+.choiceHint{font-size:12px;color:var(--sub);margin-top:4px}
+
 </style>
 </head>
 <body>
-<header><h1>勉強記録タイマー</h1><p>v13.4：分析エラー修正・タブ分け維持・Firebase同期</p></header>
+<header><h1>勉強記録タイマー</h1><p>v13.6</p></header>
 
 <section class="dashboard">
   <div class="stack">
@@ -193,7 +196,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
   <div class="title"><h2>今回の記録内容</h2><span class="small">経験値計算に使います</span></div>
   <div class="form">
     <div><label>科目ボタン</label><div class="subjects" id="subjects"></div></div>
-    <div class="two"><div><label>科目</label><input id="subject" placeholder="例：数学"></div><div><label>教材・範囲</label><input id="material" placeholder="例：名問の森 36〜38"></div></div>
+    <div class="two"><div><label>科目</label><select id="subjectPick" class="pickSelect"><option value="">候補から選択</option></select><input id="subject" placeholder="新規入力も可：例：数学"><div class="choiceHint">候補を選ぶか、新しい科目名を直接入力できます。</div></div><div><label>教材・範囲</label><select id="materialPick" class="pickSelect"><option value="">候補から選択</option></select><input id="material" placeholder="新規入力も可：例：名問の森 36〜38"><div class="choiceHint">選んだ科目に近い教材を優先表示します。</div></div></div>
     <div class="two"><div><label>理解度</label><select id="understanding"><option value="">未選択</option><option>◎</option><option>○</option><option>△</option><option>×</option></select></div><div><label>目標</label><input id="goal" placeholder="例：運保を自力で立式"></div></div>
     <div class="three"><div><label>集中度</label><select id="focusLevel"><option value="1">1 低め</option><option value="2">2 普通</option><option value="3" selected>3 良い</option><option value="4">4 かなり集中</option><option value="5">5 最高</option></select></div><div><label>ページ数</label><input id="pages" type="number" min="0" max="999" value="0"></div><div><label>問題数</label><input id="problems" type="number" min="0" max="999" value="0"></div></div>
     <div><label>教材全体ページ数・問題数</label><input id="materialTotal" type="number" min="0" max="9999" value="0" placeholder="例：名問の森なら70など。未入力でもOK"></div>
@@ -207,7 +210,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;padding:18px}
   <div class="title"><h2>手動で記録追加</h2><span class="small">何時から何時まで</span></div>
   <div class="form">
     <div class="three"><div><label>日付</label><input id="mDate" type="date"></div><div><label>開始時刻</label><input id="mStart" type="time"></div><div><label>終了時刻</label><input id="mEnd" type="time"></div></div>
-    <div class="two"><div><label>科目</label><input id="mSubject" placeholder="例：物理"></div><div><label>教材・範囲</label><input id="mMaterial" placeholder="例：名問の森 39"></div></div>
+    <div class="two"><div><label>科目</label><select id="mSubjectPick" class="pickSelect"><option value="">候補から選択</option></select><input id="mSubject" placeholder="新規入力も可：例：物理"><div class="choiceHint">候補を選ぶか、新しい科目名を直接入力できます。</div></div><div><label>教材・範囲</label><select id="mMaterialPick" class="pickSelect"><option value="">候補から選択</option></select><input id="mMaterial" placeholder="新規入力も可：例：名問の森 39"><div class="choiceHint">選んだ科目に近い教材を優先表示します。</div></div></div>
     <div class="two"><div><label>理解度</label><select id="mUnderstanding"><option value="">未選択</option><option>◎</option><option>○</option><option>△</option><option>×</option></select></div><div><label>目標</label><input id="mGoal" placeholder="例：条件整理"></div></div>
     <div class="three"><div><label>集中度</label><select id="mFocusLevel"><option value="1">1 低め</option><option value="2">2 普通</option><option value="3" selected>3 良い</option><option value="4">4 かなり集中</option><option value="5">5 最高</option></select></div><div><label>ページ数</label><input id="mPages" type="number" min="0" max="999" value="0"></div><div><label>問題数</label><input id="mProblems" type="number" min="0" max="999" value="0"></div></div>
     <div><label>教材全体ページ数・問題数</label><input id="mMaterialTotal" type="number" min="0" max="9999" value="0" placeholder="未入力でもOK"></div>
@@ -315,7 +318,53 @@ function materialLoggedMap(){let map={};records().forEach(r=>{if(!r.material)ret
 function existingSubjects(){let set=new Set(subjects);records().forEach(r=>{if(r.subject)set.add(r.subject)});Object.keys(materialSettings()).forEach(k=>set.add(materialLabelFromKey(k).subject));return [...set].filter(Boolean)}
 function existingMaterials(){let set=new Set();records().forEach(r=>{if(r.material)set.add(r.material)});Object.keys(materialSettings()).forEach(k=>{let m=materialLabelFromKey(k).material;if(m)set.add(m)});return [...set].filter(Boolean)}
 function ensureDatalist(id){let el=$(id);if(el)return el;el=document.createElement("datalist");el.id=id;document.body.appendChild(el);return el}
-function renderDatalists(){let subjectList=ensureDatalist("subjectOptions"),materialList=ensureDatalist("materialOptions");subjectList.innerHTML=existingSubjects().map(v=>`<option value="${escHTML(v)}"></option>`).join("");materialList.innerHTML=existingMaterials().map(v=>`<option value="${escHTML(v)}"></option>`).join("");["subject","mSubject"].forEach(id=>{$(id)&&$(id).setAttribute("list","subjectOptions")});["material","mMaterial"].forEach(id=>{$(id)&&$(id).setAttribute("list","materialOptions")})}
+function materialCandidatesFor(subject){
+  let set=new Set();
+  let sub=(subject||"").trim();
+  records().forEach(r=>{if(r.material && (!sub || r.subject===sub))set.add(r.material)});
+  Object.keys(materialSettings()).forEach(k=>{let lab=materialLabelFromKey(k);if(lab.material && (!sub || lab.subject===sub))set.add(lab.material)});
+  if(set.size===0){records().forEach(r=>{if(r.material)set.add(r.material)});Object.keys(materialSettings()).forEach(k=>{let m=materialLabelFromKey(k).material;if(m)set.add(m)})}
+  return [...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,"ja"));
+}
+function fillSelect(id,values,placeholder){
+  let el=$(id);if(!el)return;
+  let current=el.value;
+  el.innerHTML=`<option value="">${placeholder}</option>`+values.map(v=>`<option value="${escHTML(v)}">${escHTML(v)}</option>`).join("");
+  if(values.includes(current))el.value=current;
+}
+function syncPickFromInput(inputId,pickId){
+  let input=$(inputId),pick=$(pickId);if(!input||!pick)return;
+  pick.value=[...pick.options].some(o=>o.value===input.value)?input.value:"";
+}
+function renderDatalists(){
+  let subjectList=ensureDatalist("subjectOptions"),materialList=ensureDatalist("materialOptions");
+  let subs=existingSubjects().sort((a,b)=>a.localeCompare(b,"ja"));
+  let mats=existingMaterials().sort((a,b)=>a.localeCompare(b,"ja"));
+  subjectList.innerHTML=subs.map(v=>`<option value="${escHTML(v)}"></option>`).join("");
+  materialList.innerHTML=mats.map(v=>`<option value="${escHTML(v)}"></option>`).join("");
+  ["subject","mSubject"].forEach(id=>{$(id)&&$(id).setAttribute("list","subjectOptions")});
+  ["material","mMaterial"].forEach(id=>{$(id)&&$(id).setAttribute("list","materialOptions")});
+
+  fillSelect("subjectPick",subs,"科目候補から選択");
+  fillSelect("mSubjectPick",subs,"科目候補から選択");
+  fillSelect("materialPick",materialCandidatesFor($("subject")?.value),"教材候補から選択");
+  fillSelect("mMaterialPick",materialCandidatesFor($("mSubject")?.value),"教材候補から選択");
+  syncPickFromInput("subject","subjectPick");
+  syncPickFromInput("mSubject","mSubjectPick");
+  syncPickFromInput("material","materialPick");
+  syncPickFromInput("mMaterial","mMaterialPick");
+}
+function wireCandidateSelectors(){
+  const pairs=[
+    ["subjectPick","subject",()=>{renderDatalists();applyKnownMaterialToForm("")}],
+    ["mSubjectPick","mSubject",()=>{renderDatalists();applyKnownMaterialToForm("m")}],
+    ["materialPick","material",()=>applyKnownMaterialToForm("")],
+    ["mMaterialPick","mMaterial",()=>applyKnownMaterialToForm("m")]
+  ];
+  pairs.forEach(([pickId,inputId,after])=>{let pick=$(pickId),input=$(inputId);if(!pick||!input)return;pick.onchange=()=>{if(pick.value){input.value=pick.value;input.dispatchEvent(new Event("change"));if(after)after()}}});
+  ["subject","mSubject"].forEach(id=>{let el=$(id);if(el)el.onchange=()=>{renderDatalists();applyKnownMaterialToForm(id==="mSubject"?"m":"")}});
+  ["material","mMaterial"].forEach(id=>{let el=$(id);if(el)el.onchange=()=>{syncPickFromInput(id,id==="material"?"materialPick":"mMaterialPick");applyKnownMaterialToForm(id==="mMaterial"?"m":"")}});
+}
 function knownMaterialSetting(subject,material){let ms=materialSettings();let exact=ms[materialKey(subject,material)];if(exact)return exact;let found=Object.entries(ms).find(([k,v])=>materialLabelFromKey(k).material===material);return found?found[1]:null}
 function applyKnownMaterialToForm(prefix=""){let subjectEl=prefix?$("mSubject"):$("subject"),materialEl=prefix?$("mMaterial"):$("material"),totalEl=prefix?$("mMaterialTotal"):$("materialTotal");if(!subjectEl||!materialEl||!totalEl)return;let st=knownMaterialSetting(subjectEl.value.trim()||"未分類",materialEl.value.trim());if(st&&Number(st.total||0)>0&&(!Number(totalEl.value||0)))totalEl.value=Number(st.total||0)}
 function bonusXpTotal(){return Object.values(bonuses()).reduce((s,b)=>s+Number(b.xp||0),0)}
@@ -623,11 +672,12 @@ function setupLayoutTabs(){
   showTab(tabs.some(([id])=>id===saved)?saved:"measure");
 }
 
-function initSubjects(){subjects.forEach(sub=>{let b=document.createElement("button");b.innerHTML=`${(subjectMeta[sub]||subjectMeta["その他"]).icon} ${sub}`;b.onclick=()=>{$("subject").value=sub;$("mSubject").value=sub;document.querySelectorAll("#subjects button").forEach(x=>x.classList.remove("active"));b.classList.add("active")};$("subjects").appendChild(b)})}
+function initSubjects(){subjects.forEach(sub=>{let b=document.createElement("button");b.innerHTML=`${(subjectMeta[sub]||subjectMeta["その他"]).icon} ${sub}`;b.onclick=()=>{$("subject").value=sub;$("mSubject").value=sub;document.querySelectorAll("#subjects button").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderDatalists()};$("subjects").appendChild(b)})}
 // タブは最優先で構成する。以降の初期化でエラーが出ても、全カード表示に戻らないようにする。
 setupLayoutTabs();
 $("start").onclick=()=>run?stop():start();$("reset").onclick=reset;$("save").onclick=saveNow;$("tabPom").onclick=()=>setTool("pom");$("tabSw").onclick=()=>setTool("sw");$("manualAdd").onclick=addManual;$("csvLog").onclick=exportLog;$("csvCal").onclick=exportCal;$("focusView").onclick=openFocus;$("focusClose").onclick=closeFocus;$("backupExport").onclick=exportBackup;$("backupImportBtn").onclick=()=>$("backupImport").click();$("backupImport").onchange=e=>importBackupFile(e.target.files[0]);$("applyTarget").onclick=()=>setTargetMinutes($("customTarget").value);if($("claimGoalBonus"))$("claimGoalBonus").onclick=claimGoalBonus;document.querySelectorAll("[data-target]").forEach(b=>b.onclick=()=>setTargetMinutes(b.dataset.target));$("searchInput").oninput=renderSearch;if($("themeSelect"))$("themeSelect").onchange=()=>saveTheme($("themeSelect").value);$("searchClear").onclick=()=>{$("searchInput").value="";renderSearch()};$("showEndSummary").onclick=renderEndSummary;$("clear").onclick=()=>{if(confirm("すべての記録を削除します。元に戻せません。")){localStorage.removeItem(KEY);localStorage.removeItem(BONUS);localStorage.removeItem(MATERIAL);queueCloudSave();renderAll()}};if($("authLogin"))$("authLogin").onclick=authLogin;if($("authSignup"))$("authSignup").onclick=authSignup;if($("authLogout"))$("authLogout").onclick=authLogout;if($("syncPull"))$("syncPull").onclick=manualPullCloud;if($("syncPush"))$("syncPush").onclick=manualPushCloud;document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));["focusMin","shortMin","longMin","customMin","longEvery","sound","autoNext"].forEach(id=>$(id).onchange=()=>{saveSet();if(!run&&tool==="pom")setMode(mode)});["subject","material","focusLevel"].forEach(id=>$(id).addEventListener("input",updateFocusOverlay));["subject","material"].forEach(id=>$(id).addEventListener("change",()=>applyKnownMaterialToForm("")));["mSubject","mMaterial"].forEach(id=>$(id).addEventListener("change",()=>applyKnownMaterialToForm("m")));
 initFirebaseSync();setupPwa();loadSet();if($("themeSelect")){let th=getSetObj().theme||"standard";$("themeSelect").value=th;applyTheme(th)}if($("customTarget"))$("customTarget").value=getTargetMinutes();initSubjects();
+wireCandidateSelectors();
 renderDatalists();$("mDate").value=dkey();$("mStart").value=`${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;$("mEnd").value=`${pad(new Date(Date.now()+3600000).getHours())}:${pad(new Date(Date.now()+3600000).getMinutes())}`;setMode("focus");try{renderAll()}catch(e){console.error(e);toast("表示更新を再試行しました。記録機能は使えます。")};setInterval(updateFocusOverlay,1000);
 </script>
 </body>
