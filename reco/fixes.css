@@ -5,6 +5,11 @@ html, body {
   overflow-x: hidden;
 }
 
+:root {
+  /* JS updates this to cancel iOS Safari visual-viewport movement. */
+  --reco-vv-shift: 0px;
+}
+
 .app-shell,
 main,
 .view,
@@ -52,6 +57,8 @@ input[type="datetime-local"].input {
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   overflow: hidden;
+  transform: translate3d(-50%, var(--reco-vv-shift), 0);
+  will-change: transform;
 }
 
 .nav-item {
@@ -75,8 +82,11 @@ input[type="datetime-local"].input {
 
 .fab {
   bottom: calc(98px + env(safe-area-inset-bottom));
+  transform: translate3d(0, var(--reco-vv-shift), 0);
+  will-change: transform;
 }
 
+/* Toast follows the same visual layer, but retains its own horizontal centering. */
 .toast {
   bottom: calc(102px + env(safe-area-inset-bottom));
 }
