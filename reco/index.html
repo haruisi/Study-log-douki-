@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f6f7fb" />
+  <title>Reco</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand" data-nav="home" aria-label="ホームへ">Reco</button>
+      <button id="exportBtn" class="icon-btn" aria-label="データを書き出す" title="Export JSON">⇩</button>
+    </header>
+
+    <main>
+      <section id="view-home" class="view active"></section>
+      <section id="view-start" class="view"></section>
+      <section id="view-detail" class="view"></section>
+      <section id="view-search" class="view"></section>
+      <section id="view-stats" class="view"></section>
+    </main>
+
+    <button id="fab" class="fab" aria-label="勉強を開始">＋</button>
+
+    <nav class="bottom-nav" aria-label="メインナビゲーション">
+      <button data-nav="home" class="nav-item active"><span>⌂</span><small>Home</small></button>
+      <button data-nav="search" class="nav-item"><span>⌕</span><small>Search</small></button>
+      <button data-nav="stats" class="nav-item"><span>▥</span><small>Stats</small></button>
+    </nav>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modalRoot"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
