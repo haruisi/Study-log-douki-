@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#f6f7fb" />
   <title>Reco</title>
-  <link rel="manifest" href="manifest.webmanifest?v=0.4.1" />
-  <link rel="stylesheet" href="styles.css?v=0.4.1" />
-  <link rel="stylesheet" href="fixes.css?v=0.4.1" />
+  <link rel="manifest" href="manifest.webmanifest?v=0.5.0" />
+  <link rel="stylesheet" href="styles.css?v=0.5.0" />
+  <link rel="stylesheet" href="fixes.css?v=0.5.0" />
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <button class="brand" data-nav="home" aria-label="ホームへ">Reco</button>
       <div class="top-actions">
-        <span class="version-badge" aria-label="現在のバージョン">v0.4.1</span>
+        <button id="syncBtn" class="icon-btn sync-btn" data-state="off" aria-label="端末間同期" title="端末間同期">☁︎</button>
+        <span class="version-badge" aria-label="現在のバージョン">v0.5.0</span>
         <button id="exportBtn" class="icon-btn" aria-label="データを書き出す" title="Export JSON">⇩</button>
       </div>
     </header>
@@ -39,7 +40,8 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="modalRoot"></div>
 
-  <script src="app.js?v=0.4.1"></script>
-  <script src="fixes.js?v=0.4.1"></script>
+  <script src="app.js?v=0.5.0"></script>
+  <script src="fixes.js?v=0.5.0"></script>
+  <script src="sync.js?v=0.5.0"></script>
 </body>
 </html>
