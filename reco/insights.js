@@ -96,8 +96,9 @@ function insightDailySeries(sessions, start, today) {
     totals.set(key, (totals.get(key) || 0) + insightSessionMinutes(session));
   });
 
+  const historyStart = insightAddDays(start, -6);
   const days = [];
-  for (let cursor = new Date(start); cursor <= today; cursor = insightAddDays(cursor, 1)) {
+  for (let cursor = new Date(historyStart); cursor <= today; cursor = insightAddDays(cursor, 1)) {
     const date = new Date(cursor);
     days.push({ date, minutes: totals.get(insightDateKey(date)) || 0 });
   }
@@ -107,7 +108,7 @@ function insightDailySeries(sessions, start, today) {
     const slice = days.slice(from, index + 1);
     const average = slice.reduce((sum, item) => sum + item.minutes, 0) / slice.length;
     return { ...day, average };
-  });
+  }).filter((day) => day.date >= start);
 }
 
 function insightTrendChart(series, period) {
@@ -244,7 +245,7 @@ function renderEnhancedInsights(force = false) {
     const todayTotal = sessions
       .filter((session) => insightDateKey(new Date(session.startedAt)) === insightDateKey(today))
       .reduce((sum, session) => sum + insightSessionMinutes(session), 0);
-    const series = insightDailySeries(current, start, today);
+    const series = insightDailySeries(sessions, start, today);
     const latestAverage = series.length ? series[series.length - 1].average : 0;
     const periodLabel = insightsPeriod === '7d' ? 'Last 7 days' : insightsPeriod === '30d' ? 'Last 30 days' : 'All time';
 
