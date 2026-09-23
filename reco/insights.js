@@ -1,6 +1,15 @@
-// Insights v0.6.0 -----------------------------------------------------------
+// Insights v0.6.1 -----------------------------------------------------------
 const INSIGHTS_STORAGE_KEY = 'reco.sessions.v1';
 const INSIGHTS_SUBJECTS = ['数学', '英語', '物理', '化学', '国語', '地理', 'その他'];
+const INSIGHTS_SUBJECT_COLORS = {
+  '数学': '#4f6bed',
+  '英語': '#7b61c9',
+  '物理': '#2f8f9d',
+  '化学': '#d28a2f',
+  '国語': '#c65b65',
+  '地理': '#5b8f58',
+  'その他': '#8a92a3'
+};
 let insightsPeriod = '7d';
 let insightsRendering = false;
 
@@ -152,7 +161,22 @@ function insightTrendChart(series, period) {
     </div>`;
 }
 
-function insightSubjectRows(current, previous, period) {
+function insightPiePoint(cx, cy, radius, angle) {
+  const radians = ((angle - 90) * Math.PI) / 180;
+  return {
+    x: cx + radius * Math.cos(radians),
+    y: cy + radius * Math.sin(radians)
+  };
+}
+
+function insightPiePath(cx, cy, radius, startAngle, endAngle) {
+  const start = insightPiePoint(cx, cy, radius, startAngle);
+  const end = insightPiePoint(cx, cy, radius, endAngle);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${start.x.toFixed(3)} ${start.y.toFixed(3)} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)} Z`;
+}
+
+function insightSubjectBalance(current, previous, period) {
   const currentTotals = Object.fromEntries(INSIGHTS_SUBJECTS.map((subject) => [subject, 0]));
   const previousTotals = Object.fromEntries(INSIGHTS_SUBJECTS.map((subject) => [subject, 0]));
 
@@ -172,7 +196,18 @@ function insightSubjectRows(current, previous, period) {
 
   if (!subjects.length) return '<div class="empty insight-empty">No subject data yet.</div>';
 
-  return subjects.map((subject) => {
+  let angle = 0;
+  const slices = subjects.length === 1
+    ? `<circle cx="100" cy="100" r="88" fill="${INSIGHTS_SUBJECT_COLORS[subjects[0]]}"><title>${insightEsc(subjects[0])} · 100% · ${insightDuration(currentTotals[subjects[0]])}</title></circle>`
+    : subjects.map((subject) => {
+        const minutes = currentTotals[subject];
+        const share = currentTotal ? (minutes / currentTotal) * 100 : 0;
+        const startAngle = angle;
+        angle += (share / 100) * 360;
+        return `<path class="insight-pie-slice" d="${insightPiePath(100, 100, 88, startAngle, angle)}" fill="${INSIGHTS_SUBJECT_COLORS[subject]}"><title>${insightEsc(subject)} · ${share.toFixed(1)}% · ${insightDuration(minutes)}</title></path>`;
+      }).join('');
+
+  const legend = subjects.map((subject) => {
     const minutes = currentTotals[subject];
     const share = currentTotal ? (minutes / currentTotal) * 100 : 0;
     let delta = '';
@@ -187,15 +222,31 @@ function insightSubjectRows(current, previous, period) {
         delta = '<span class="subject-delta neutral">—</span>';
       }
     }
+
     return `
-      <div class="insight-subject-row">
-        <div class="insight-subject-top">
+      <div class="insight-pie-legend-row">
+        <span class="insight-subject-dot" style="background:${INSIGHTS_SUBJECT_COLORS[subject]}"></span>
+        <div class="insight-pie-legend-main">
           <b>${insightEsc(subject)}</b>
-          <div class="insight-subject-values"><span>${insightDuration(minutes)}</span><span>${share.toFixed(0)}%</span>${delta}</div>
+          <span>${insightDuration(minutes)}</span>
         </div>
-        <div class="insight-share-track"><div class="insight-share-bar" style="width:${Math.max(1.5, share).toFixed(1)}%"></div></div>
+        <div class="insight-pie-legend-value">
+          <b>${share.toFixed(0)}%</b>
+          ${delta}
+        </div>
       </div>`;
   }).join('');
+
+  return `
+    <div class="insight-pie-layout">
+      <div class="insight-pie-visual">
+        <svg class="insight-pie" viewBox="0 0 200 200" role="img" aria-label="Study time share by subject">
+          ${slices}
+        </svg>
+        <div class="insight-pie-caption"><span>Total</span><b>${insightDuration(currentTotal)}</b></div>
+      </div>
+      <div class="insight-pie-legend">${legend}</div>
+    </div>`;
 }
 
 function insightResourceRows(current) {
@@ -234,7 +285,7 @@ function insightResourceRows(current) {
 function renderEnhancedInsights(force = false) {
   const el = document.querySelector('#view-stats');
   if (!el || insightsRendering) return;
-  if (!force && el.querySelector('.insights-v060')) return;
+  if (!force && el.querySelector('.insights-v061')) return;
 
   insightsRendering = true;
   try {
@@ -250,7 +301,7 @@ function renderEnhancedInsights(force = false) {
     const periodLabel = insightsPeriod === '7d' ? 'Last 7 days' : insightsPeriod === '30d' ? 'Last 30 days' : 'All time';
 
     el.innerHTML = `
-      <div class="insights-v060">
+      <div class="insights-v061">
         <div class="insight-title-row">
           <h1 class="page-title">Insights</h1>
           <div class="insight-range" role="group" aria-label="Insight period">
@@ -277,7 +328,7 @@ function renderEnhancedInsights(force = false) {
         </div>
 
         <div class="section-head insight-section-head"><h2>Subject Balance</h2><span>${periodLabel}</span></div>
-        <div class="card insight-panel">${insightSubjectRows(current, previous, insightsPeriod)}</div>
+        <div class="card insight-panel insight-subject-panel">${insightSubjectBalance(current, previous, insightsPeriod)}</div>
 
         <div class="section-head insight-section-head"><h2>Materials</h2><span>Top 8 · ${periodLabel}</span></div>
         <div class="card insight-panel">${insightResourceRows(current)}</div>
