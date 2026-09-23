@@ -1,0 +1,52 @@
+/* iPad/iOS layout fixes */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app-shell,
+main,
+.view,
+.card,
+.form-card,
+.field {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.field {
+  overflow: hidden;
+}
+
+.input,
+input.input,
+textarea.input,
+select.input {
+  min-width: 0;
+  max-width: 100%;
+}
+
+input[type="datetime-local"].input {
+  display: block;
+  width: 100%;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 16px;
+}
+
+/* Keep the start form comfortably inside the viewport on iPad/Safari. */
+@media (max-width: 760px) {
+  .app-shell {
+    width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .form-card {
+    width: 100%;
+    overflow: hidden;
+  }
+}
