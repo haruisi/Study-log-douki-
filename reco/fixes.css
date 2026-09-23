@@ -62,6 +62,83 @@ input[type="datetime-local"].input {
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Sync indicator. */
+.sync-btn {
+  position: relative;
+  font-size: 17px;
+}
+
+.sync-btn::after {
+  content: '';
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  background: #a7adba;
+}
+
+.sync-btn[data-state="syncing"]::after { background: #e5a52f; }
+.sync-btn[data-state="synced"]::after { background: #39a66a; }
+.sync-btn[data-state="error"]::after { background: #cf4d4d; }
+
+.sync-key-box {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f7f8fb;
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.sync-warning,
+.sync-error-text {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.sync-error-text { color: var(--danger); }
+
+.sync-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.sync-divider::before,
+.sync-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.sync-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.sync-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #39a66a;
+}
+
 /*
   iOS Safari changes the visible viewport height when browser chrome expands/collapses.
   svh is the SMALL viewport height and stays constant through that animation.
@@ -130,5 +207,15 @@ input[type="datetime-local"].input {
   .form-card {
     width: 100%;
     overflow: hidden;
+  }
+
+  .top-actions {
+    gap: 6px;
+  }
+
+  .version-badge {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 10px;
   }
 }
