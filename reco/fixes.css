@@ -5,11 +5,6 @@ html, body {
   overflow-x: hidden;
 }
 
-:root {
-  /* JS updates this to cancel iOS Safari visual-viewport movement. */
-  --reco-vv-shift: 0px;
-}
-
 .app-shell,
 main,
 .view,
@@ -67,9 +62,14 @@ input[type="datetime-local"].input {
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* Floating bottom navigation: visually one layer above the page. */
+/*
+  iOS Safari changes the visible viewport height when browser chrome expands/collapses.
+  svh is the SMALL viewport height and stays constant through that animation.
+  Anchor the floating controls from the top using svh so they do not chase Safari's toolbar.
+*/
 .bottom-nav {
-  bottom: max(14px, env(safe-area-inset-bottom));
+  top: calc(100svh - 86px);
+  bottom: auto;
   width: min(calc(100% - 32px), 688px);
   height: 68px;
   padding: 8px 10px;
@@ -82,8 +82,8 @@ input[type="datetime-local"].input {
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   overflow: hidden;
-  transform: translate3d(-50%, var(--reco-vv-shift), 0);
-  will-change: transform;
+  transform: translateX(-50%);
+  will-change: auto;
 }
 
 .nav-item {
@@ -100,20 +100,22 @@ input[type="datetime-local"].input {
   transform: scale(.97);
 }
 
-/* Reserve space under content and keep the + button above the floating nav. */
+/* Reserve space under content and pin the + button to the same stable coordinate system. */
 .app-shell {
-  padding-bottom: 126px;
+  padding-bottom: 140px;
 }
 
 .fab {
-  bottom: calc(98px + env(safe-area-inset-bottom));
-  transform: translate3d(0, var(--reco-vv-shift), 0);
-  will-change: transform;
+  top: calc(100svh - 174px);
+  bottom: auto;
+  transform: none;
+  will-change: auto;
 }
 
-/* Toast follows the same visual layer, but retains its own horizontal centering. */
+/* Toast stays above the fixed navigation. */
 .toast {
-  bottom: calc(102px + env(safe-area-inset-bottom));
+  top: calc(100svh - 142px);
+  bottom: auto;
 }
 
 /* Keep the start form comfortably inside the viewport on iPad/Safari. */
@@ -122,7 +124,7 @@ input[type="datetime-local"].input {
     width: 100%;
     padding-left: 16px;
     padding-right: 16px;
-    padding-bottom: 126px;
+    padding-bottom: 140px;
   }
 
   .form-card {
