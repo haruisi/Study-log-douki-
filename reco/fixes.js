@@ -154,8 +154,204 @@ function applyClockVisibility() {
   }
 }
 
+// Pure-black dark mode. Intentionally avoid setting a global CSS color-scheme so iPadOS
+// is not explicitly asked to switch native status-bar text to the light appearance.
+const DARK_MODE_KEY = 'reco.darkMode.v1';
+let darkModeEnabled = localStorage.getItem(DARK_MODE_KEY) === 'true';
+
+const darkModeStyle = document.createElement('style');
+darkModeStyle.textContent = `
+  body.reco-dark {
+    --bg: #000000;
+    --surface: #0b0b0d;
+    --surface-2: #17171a;
+    --text: #f5f5f7;
+    --muted: #9a9aa1;
+    --line: #29292e;
+    --accent: #f5f5f7;
+    --accent-soft: #19191c;
+    --danger: #ff6b6b;
+    --shadow: none;
+    background: #000000;
+  }
+
+  html.reco-dark-root,
+  html.reco-dark-root body {
+    background: #000000;
+  }
+
+  body.reco-dark .topbar,
+  body.reco-dark .searchbar {
+    background: rgba(0,0,0,.92);
+  }
+
+  body.reco-dark .bottom-nav {
+    background: rgba(0,0,0,.96);
+  }
+
+  body.reco-dark .nav-item.active,
+  body.reco-dark .subject-badge {
+    color: var(--text);
+  }
+
+  body.reco-dark .card,
+  body.reco-dark .stat-box,
+  body.reco-dark .reply,
+  body.reco-dark .modal,
+  body.reco-dark .filter-chip,
+  body.reco-dark .quick,
+  body.reco-dark .insight-range {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  body.reco-dark .input,
+  body.reco-dark .subject-chip {
+    background: #101012;
+    color: var(--text);
+    border-color: var(--line);
+  }
+
+  body.reco-dark .input:focus {
+    background: #141417;
+    border-color: #5a5a62;
+  }
+
+  body.reco-dark input[type="datetime-local"] {
+    color-scheme: dark;
+  }
+
+  body.reco-dark .btn-primary {
+    background: #f5f5f7;
+    color: #09090a;
+  }
+
+  body.reco-dark .now-card {
+    background: #111114;
+    color: #f5f5f7;
+    border: 1px solid #25252a;
+  }
+
+  body.reco-dark .now-card .btn-primary {
+    background: #f5f5f7;
+    color: #09090a;
+  }
+
+  body.reco-dark .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  body.reco-dark .btn-danger {
+    background: #291315;
+    color: #ff8585;
+  }
+
+  body.reco-dark .subject-chip.selected,
+  body.reco-dark .filter-chip.active,
+  body.reco-dark .insight-range-button.active {
+    background: #f5f5f7;
+    color: #09090a;
+    border-color: #f5f5f7;
+  }
+
+  body.reco-dark .fab {
+    background: #f5f5f7;
+    color: #09090a;
+    box-shadow: 0 12px 30px rgba(0,0,0,.5);
+  }
+
+  body.reco-dark .toast {
+    background: #f5f5f7;
+    color: #09090a;
+  }
+
+  body.reco-dark .modal-backdrop {
+    background: rgba(0,0,0,.72);
+  }
+
+  body.reco-dark .insight-chart-bar,
+  body.reco-dark .legend-bar {
+    fill: #3a3a40;
+    background: #3a3a40;
+  }
+
+  body.reco-dark .insight-chart-average {
+    stroke: #f5f5f7;
+  }
+
+  body.reco-dark .insight-chart-dot {
+    fill: #f5f5f7;
+  }
+
+  body.reco-dark .insight-chart-baseline {
+    stroke: #29292e;
+  }
+
+  body.reco-dark .insight-chart-label {
+    fill: #9a9aa1;
+  }
+
+  body.reco-dark .legend-line,
+  body.reco-dark .insight-resource-bar,
+  body.reco-dark .bar {
+    background: #d9d9de;
+  }
+
+  body.reco-dark .insight-range {
+    border-color: var(--line);
+  }
+
+  body.reco-dark #darkModeBtn[data-state="on"] {
+    background: #f5f5f7;
+    color: #09090a;
+    border-color: #f5f5f7;
+  }
+`;
+document.head.appendChild(darkModeStyle);
+
+function ensureDarkModeButton() {
+  const actions = document.querySelector('.top-actions');
+  if (!actions) return null;
+
+  let button = document.querySelector('#darkModeBtn');
+  if (button) return button;
+
+  button = document.createElement('button');
+  button.id = 'darkModeBtn';
+  button.className = 'icon-btn';
+  button.type = 'button';
+  button.textContent = '◐';
+  button.onclick = () => {
+    darkModeEnabled = !darkModeEnabled;
+    localStorage.setItem(DARK_MODE_KEY, String(darkModeEnabled));
+    applyDarkMode();
+  };
+
+  const syncButton = document.querySelector('#syncBtn');
+  actions.insertBefore(button, syncButton || actions.firstChild);
+  return button;
+}
+
+function applyDarkMode() {
+  const button = ensureDarkModeButton();
+  document.documentElement.classList.toggle('reco-dark-root', darkModeEnabled);
+  document.body.classList.toggle('reco-dark', darkModeEnabled);
+
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) themeColor.content = darkModeEnabled ? '#000000' : '#f6f7fb';
+
+  if (button) {
+    button.dataset.state = darkModeEnabled ? 'on' : 'off';
+    button.setAttribute('aria-pressed', String(darkModeEnabled));
+    button.setAttribute('aria-label', darkModeEnabled ? 'ライトモードに切り替える' : 'ダークモードに切り替える');
+    button.title = darkModeEnabled ? 'ダークモード: ON' : 'ダークモード: OFF';
+  }
+}
+
 upgradeReplyInput();
 applyClockVisibility();
+applyDarkMode();
 new MutationObserver(() => {
   upgradeReplyInput();
   markClockTimes();
