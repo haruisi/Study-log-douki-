@@ -1,0 +1,47 @@
+/* Optical centering for rounded controls */
+.insight-range-button,
+.btn-primary,
+.btn-secondary,
+.subject-chip,
+.filter-chip,
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.insight-range-button {
+  min-height: 38px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* SF/Hiragino glyphs look a touch low when mathematically centered. */
+.insight-range-button,
+.btn-primary,
+.btn-secondary,
+.subject-chip,
+.filter-chip,
+.version-badge {
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+}
+
+/* Fallback optical correction on browsers that ignore text-box-trim. */
+@supports not (text-box-trim: trim-both) {
+  .insight-range-button,
+  .btn-primary,
+  .btn-secondary,
+  .subject-chip,
+  .filter-chip,
+  .version-badge {
+    padding-top: calc(var(--optical-pad-top, 0px) - 0.5px);
+    padding-bottom: calc(var(--optical-pad-bottom, 0px) + 0.5px);
+  }
+
+  .insight-range-button {
+    --optical-pad-top: 0px;
+    --optical-pad-bottom: 0px;
+  }
+}
