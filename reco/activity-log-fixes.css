@@ -1,0 +1,58 @@
+/* Reco activity-only log fixes: v0.7.1 */
+
+/* Long activity forms must remain usable on iPhone/iPad. */
+.activity-modal-backdrop {
+  overflow: hidden;
+}
+
+.activity-modal-backdrop .modal {
+  max-height: calc(100dvh - max(12px, env(safe-area-inset-top)));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.activity-modal-backdrop .modal::-webkit-scrollbar {
+  display: none;
+}
+
+/* Keep the submit/cancel controls reachable while scrolling the long form. */
+.activity-log-form .modal-actions {
+  position: sticky;
+  bottom: calc(-1 * max(22px, env(safe-area-inset-bottom)));
+  z-index: 4;
+  margin-left: -18px;
+  margin-right: -18px;
+  padding: 12px 18px max(22px, env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+
+/* Put the two home actions side by side instead of stacking/overlapping. */
+.log-fab {
+  right: max(94px, calc((100vw - 720px)/2 + 94px)) !important;
+  bottom: 88px !important;
+  height: 58px !important;
+  min-width: 76px !important;
+  padding: 0 17px !important;
+  border-radius: 20px !important;
+}
+
+/* The existing + button stays in the right-hand slot. */
+#fab {
+  right: max(22px, calc((100vw - 720px)/2 + 22px));
+  bottom: 88px;
+}
+
+/* Avoid the iOS keyboard covering the last field/button when the form is open. */
+@supports (height: 100dvh) {
+  .activity-modal-backdrop .modal {
+    max-height: calc(100dvh - max(12px, env(safe-area-inset-top)));
+  }
+}
+
+body.reco-dark .activity-log-form .modal-actions {
+  background: var(--surface);
+  border-top-color: var(--line);
+}
