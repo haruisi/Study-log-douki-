@@ -1,0 +1,53 @@
+/* Reco v0.8.4 — compact toast placement */
+.toast{
+  position:fixed!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:calc(max(18px,env(safe-area-inset-bottom)) + 84px)!important;
+  transform:translate(-50%,12px)!important;
+  width:max-content!important;
+  min-width:0!important;
+  max-width:min(82vw,320px)!important;
+  height:auto!important;
+  min-height:40px!important;
+  aspect-ratio:auto!important;
+  padding:10px 14px!important;
+  margin:0!important;
+  border-radius:999px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  background:#f1f1f2!important;
+  color:#090909!important;
+  font-size:13px!important;
+  font-weight:700!important;
+  line-height:1.15!important;
+  letter-spacing:0!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  z-index:420!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  box-shadow:none!important;
+  transition:opacity .18s ease,transform .18s ease!important;
+}
+.toast.show{
+  opacity:1!important;
+  transform:translate(-50%,0)!important;
+}
+
+/* Keep the persistent finish affordance visually separate from transient toasts. */
+.radical-finish-hint{
+  bottom:88px!important;
+}
+
+@media(max-width:420px){
+  .toast{
+    max-width:78vw!important;
+    font-size:12px!important;
+    padding:9px 13px!important;
+  }
+}
