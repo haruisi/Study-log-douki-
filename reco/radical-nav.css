@@ -1,0 +1,39 @@
+.app-shell{padding-bottom:100px}
+.radical-surface{min-height:calc(100dvh - 128px)}
+.radical-new{bottom:78px}
+.radical-finish-hint{bottom:76px}
+#view-search,#view-stats,#view-detail{padding-bottom:104px}
+.radical-bottom-nav{
+  position:fixed;
+  left:50%;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  z-index:180;
+  width:min(calc(100% - 48px),672px);
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  align-items:center;
+  pointer-events:auto;
+}
+.radical-bottom-item{
+  appearance:none;
+  -webkit-appearance:none;
+  border:0;
+  background:transparent;
+  color:#404147;
+  padding:12px 8px;
+  font-size:12px;
+  line-height:1;
+  font-weight:650;
+  letter-spacing:-.01em;
+  text-align:center;
+  transition:color .16s ease,opacity .16s ease,transform .12s ease;
+}
+.radical-bottom-item.active{color:#f3f3f4}
+.radical-bottom-item:active{opacity:.52;transform:scale(.98)}
+.radical-create-picker .radical-create-list{gap:18px}
+.radical-create-picker .radical-create-list button{font-size:clamp(34px,9vw,52px)}
+@media(max-width:420px){
+  .radical-bottom-nav{width:calc(100% - 34px)}
+  .radical-bottom-item{font-size:11px}
+}
