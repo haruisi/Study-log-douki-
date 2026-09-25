@@ -106,6 +106,24 @@
     requestAnimationFrame(()=>overlay.classList.add('open'));
   }
 
+  function closeCreate(){ q('#radicalCreate')?.remove(); }
+  function openCreate(){
+    closeCreate();
+    const overlay=el('div','radical-overlay');
+    overlay.id='radicalCreate';
+    const panel=el('div','radical-picker radical-create-picker');
+    const close=el('button','radical-close','×');close.type='button';close.onclick=closeCreate;
+    const list=el('div','radical-picker-list radical-create-list');
+    const start=el('button','', 'Start session');start.type='button';
+    start.onclick=()=>{closeCreate();openPicker();};
+    const log=el('button','', 'Record activity');log.type='button';
+    log.onclick=()=>{closeCreate();q('#logFab')?.click();};
+    list.append(start,log);panel.append(close,list);overlay.appendChild(panel);
+    overlay.addEventListener('click',event=>{if(event.target===overlay)closeCreate();});
+    document.body.appendChild(overlay);
+    requestAnimationFrame(()=>overlay.classList.add('open'));
+  }
+
   function renderIdle(surface, items){
     surface.replaceChildren();
     surface.className='radical-surface is-idle';
@@ -140,7 +158,7 @@
       field.appendChild(button);
     });
     surface.appendChild(field);
-    const add=el('button','radical-new','＋'); add.type='button'; add.onclick=openPicker;
+    const add=el('button','radical-new','＋'); add.type='button'; add.onclick=openCreate;
     surface.appendChild(add);
   }
 
