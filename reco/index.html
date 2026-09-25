@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#f6f7fb" />
-  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark" />
   <title>Reco</title>
-  <link rel="manifest" href="manifest.webmanifest?v=0.6.1" />
+  <link rel="manifest" href="manifest.webmanifest?v=0.8.0" />
   <link rel="stylesheet" href="styles.css?v=0.6.1" />
   <link rel="stylesheet" href="fixes.css?v=0.6.1" />
   <link rel="stylesheet" href="insights.css?v=0.6.1" />
   <link rel="stylesheet" href="activity-log-fixes.css?v=0.7.2" />
+  <link rel="stylesheet" href="radical-ui.css?v=0.8.0" />
 </head>
 <body>
   <div class="app-shell">
@@ -18,7 +19,7 @@
       <button class="brand" data-nav="home" aria-label="ホームへ">Reco</button>
       <div class="top-actions">
         <button id="syncBtn" class="icon-btn sync-btn" data-state="off" aria-label="端末間同期" title="端末間同期">☁︎</button>
-        <span class="version-badge" aria-label="現在のバージョン">v0.7.3</span>
+        <span class="version-badge" aria-label="現在のバージョン">v0.8.0</span>
         <button id="exportBtn" class="icon-btn" aria-label="データを書き出す" title="Export JSON">⇩</button>
       </div>
     </header>
@@ -51,5 +52,7 @@
   <script src="activity-log.js?v=0.7.2"></script>
   <script src="activity-log-sync.js?v=0.7.2"></script>
   <script src="study-day-overrides.js?v=0.7.3"></script>
+  <script src="radical-ui.js?v=0.8.0"></script>
+  <script src="radical-menu.js?v=0.8.0"></script>
 </body>
 </html>
