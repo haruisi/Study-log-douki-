@@ -2,6 +2,7 @@
   const STORAGE_KEY = 'reco.sessions.v1';
   const RESOURCE_KEY = 'reco.resources.v1';
   const SUBJECTS = ['数学','英語','物理','化学','国語','地理','その他'];
+  const STUDY_DAY_START_HOUR = 4;
 
   let sessions = load(STORAGE_KEY, []);
   let resources = load(RESOURCE_KEY, {});
@@ -18,15 +19,24 @@
   function load(key, fallback){ try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); localStorage.setItem(RESOURCE_KEY, JSON.stringify(resources)); }
   function nowLocal(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
-  function todayYMD(){ return nowLocal().slice(0,10); }
   function parseLocal(s){ return new Date(s); }
+  function studyDayDate(value=new Date()){
+    const d=value instanceof Date ? new Date(value) : parseLocal(value);
+    d.setHours(d.getHours()-STUDY_DAY_START_HOUR);
+    return d;
+  }
+  function studyDayYMD(value=new Date()){
+    const d=studyDayDate(value);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+  function currentStudyDayYMD(){ return studyDayYMD(new Date()); }
+  function sameStudyDay(iso, ymd){ return studyDayYMD(iso)===ymd; }
   function fmtTime(s){ if(!s) return ''; const d=parseLocal(s); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
   function fmtDate(s){ const d=parseLocal(s); return `${d.getMonth()+1}/${d.getDate()}`; }
   function minsBetween(a,b){ return Math.max(0, Math.round((parseLocal(b)-parseLocal(a))/60000)); }
   function durationText(mins){ const h=Math.floor(mins/60), m=mins%60; return h ? `${h}h ${m}m` : `${m}m`; }
   function sessionMinutes(s){ return s.endedAt ? minsBetween(s.startedAt,s.endedAt) : minsBetween(s.startedAt,new Date().toISOString()); }
   function activeSession(){ return sessions.find(s => !s.endedAt); }
-  function sameLocalDate(iso, ymd){ const d=parseLocal(iso); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`===ymd; }
   function toInputValue(iso){ const d=parseLocal(iso); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
   function fromInput(v){ return new Date(v).toISOString(); }
 
@@ -40,7 +50,7 @@
   function renderHome(){
     const el=$('#view-home');
     const active=activeSession();
-    const today=sessions.filter(s=>sameLocalDate(s.startedAt,todayYMD())).sort((a,b)=>parseLocal(b.startedAt)-parseLocal(a.startedAt));
+    const today=sessions.filter(s=>sameStudyDay(s.startedAt,currentStudyDayYMD())).sort((a,b)=>parseLocal(b.startedAt)-parseLocal(a.startedAt));
     const todayMins=today.reduce((sum,s)=>sum+(s.endedAt?sessionMinutes(s):0),0);
     el.innerHTML=`
       ${active ? `
@@ -208,8 +218,13 @@
   function renderStats(){
     const el=$('#view-stats');
     const completed=sessions.filter(s=>s.endedAt);
-    const today=completed.filter(s=>sameLocalDate(s.startedAt,todayYMD()));
-    const now=new Date(); const startWeek=new Date(now); const day=(now.getDay()+6)%7; startWeek.setHours(0,0,0,0); startWeek.setDate(now.getDate()-day);
+    const currentDay=currentStudyDayYMD();
+    const today=completed.filter(s=>sameStudyDay(s.startedAt,currentDay));
+    const shiftedNow=studyDayDate(new Date());
+    const startWeek=new Date(shiftedNow);
+    const day=(shiftedNow.getDay()+6)%7;
+    startWeek.setDate(shiftedNow.getDate()-day);
+    startWeek.setHours(STUDY_DAY_START_HOUR,0,0,0);
     const week=completed.filter(s=>parseLocal(s.startedAt)>=startWeek);
     const total=a=>a.reduce((x,s)=>x+sessionMinutes(s),0);
     const bySubject={}; completed.forEach(s=>bySubject[s.subject]=(bySubject[s.subject]||0)+sessionMinutes(s));
@@ -235,10 +250,16 @@
   $('#exportBtn').onclick=()=>{
     const payload={version:1,exportedAt:new Date().toISOString(),sessions};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`reco-${todayYMD()}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); toast('JSONを書き出しました');
+    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`reco-${currentStudyDayYMD()}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); toast('JSONを書き出しました');
   };
+  let renderedStudyDay=currentStudyDayYMD();
   setInterval(()=>{
     $$('[data-live-duration]').forEach(el=>{ const s=sessions.find(x=>x.id===el.dataset.liveDuration); if(s&&!s.endedAt)el.textContent=`現在 ${durationText(sessionMinutes(s))}`; });
+    const currentDay=currentStudyDayYMD();
+    if(currentDay!==renderedStudyDay){
+      renderedStudyDay=currentDay;
+      render();
+    }
   },30000);
   render();
 })();
