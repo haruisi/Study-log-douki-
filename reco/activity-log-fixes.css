@@ -1,4 +1,4 @@
-/* Reco activity-only log fixes: v0.7.1 */
+/* Reco activity-only log fixes: v0.7.2 */
 
 /* Long activity forms must remain usable on iPhone/iPad. */
 .activity-modal-backdrop {
@@ -29,20 +29,28 @@
   border-top: 1px solid var(--line);
 }
 
-/* Put the two home actions side by side instead of stacking/overlapping. */
+/*
+  Home actions use the same svh-based vertical anchor as the existing iOS-safe FAB.
+  This prevents Safari's changing browser chrome from shifting one button relative to the other.
+*/
 .log-fab {
-  right: max(94px, calc((100vw - 720px)/2 + 94px)) !important;
-  bottom: 88px !important;
+  right: max(90px, calc((100vw - 720px)/2 + 90px)) !important;
+  top: calc(100svh - 174px) !important;
+  bottom: auto !important;
   height: 58px !important;
-  min-width: 76px !important;
-  padding: 0 17px !important;
+  min-width: 88px !important;
+  padding: 0 18px !important;
   border-radius: 20px !important;
+  transform: none !important;
+  will-change: auto;
 }
 
-/* The existing + button stays in the right-hand slot. */
 #fab {
-  right: max(22px, calc((100vw - 720px)/2 + 22px));
-  bottom: 88px;
+  right: max(22px, calc((100vw - 720px)/2 + 22px)) !important;
+  top: calc(100svh - 174px) !important;
+  bottom: auto !important;
+  transform: none !important;
+  will-change: auto;
 }
 
 /* Avoid the iOS keyboard covering the last field/button when the form is open. */
