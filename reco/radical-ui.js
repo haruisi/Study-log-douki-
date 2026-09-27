@@ -79,7 +79,7 @@
       chip?.click();
       const resource = q('#view-start #resource');
       if (resource) resource.value = lastResource(subject);
-      q('#view-start #startForm')?.requestSubmit();
+      // Keep the start form open so the material can be reviewed or changed first.
     });
   }
 

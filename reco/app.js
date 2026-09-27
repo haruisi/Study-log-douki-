@@ -100,12 +100,12 @@
       <h1 class="page-title">勉強を開始</h1>
       ${last?`<button id="repeatLast" class="card btn-block" style="text-align:left;margin-bottom:12px;border:1px solid var(--line)">
         <div class="eyebrow" style="margin:0 0 6px">前回</div>
-        <b>${esc(last.subject)} / ${esc(last.resource||'教材なし')}</b><div class="resource">同じ内容で開始</div>
+        <b>${esc(last.subject)} / ${esc(last.resource||'教材なし')}</b><div class="resource">前回の内容を読み込む</div>
       </button>`:''}
       <form id="startForm" class="card form-card">
         <div class="field"><label>開始時刻</label><input id="startAt" class="input" type="datetime-local" value="${nowLocal()}" required></div>
         <div class="field"><label>科目</label><div class="subject-grid">${SUBJECTS.map((s,i)=>`<button type="button" class="subject-chip ${i===0?'selected':''}" data-subject="${s}">${s}</button>`).join('')}</div></div>
-        <div class="field"><label>教材</label><input id="resource" class="input" list="resourceList" placeholder="例：東大過去問"><datalist id="resourceList"></datalist><div id="resourceQuick" class="quick-row"></div></div>
+        <div class="field"><label>教材（必須）</label><input id="resource" class="input" list="resourceList" placeholder="選ぶか入力：東大過去問" required><datalist id="resourceList"></datalist><div id="resourceQuick" class="quick-row"></div></div>
         <div class="field"><label>メモ（任意）</label><textarea id="note" class="input" placeholder="問題番号や今日やること"></textarea></div>
         <button class="btn btn-primary btn-block" type="submit">勉強開始</button>
       </form>`;
@@ -118,8 +118,20 @@
     };
     $$('.subject-chip',el).forEach(b=>b.onclick=()=>{ selected=b.dataset.subject; $$('.subject-chip',el).forEach(x=>x.classList.toggle('selected',x===b)); updateResources(); });
     updateResources();
-    if(last) $('#repeatLast',el).onclick=()=>startSession({ subject:last.subject, resource:last.resource||'', note:'', startedAt:new Date().toISOString() });
-    $('#startForm',el).onsubmit=e=>{ e.preventDefault(); startSession({subject:selected,resource:$('#resource',el).value.trim(),note:$('#note',el).value.trim(),startedAt:fromInput($('#startAt',el).value)}); };
+    if(last) $('#repeatLast',el).onclick=()=>{
+      selected=last.subject;
+      $('.subject-chip',el).forEach(x=>x.classList.toggle('selected',x.dataset.subject===selected));
+      updateResources();
+      $('#resource',el).value=last.resource||'';
+      $('#note',el).value=last.note||'';
+      toast('前回の内容をセットしました。教材を確認して開始してください。');
+    };
+    $('#startForm',el).onsubmit=e=>{
+      e.preventDefault();
+      const material=$('#resource',el).value.trim();
+      if(!material){ toast('教材を選択または入力してください'); $('#resource',el).focus(); return; }
+      startSession({subject:selected,resource:material,note:$('#note',el).value.trim(),startedAt:fromInput($('#startAt',el).value)});
+    };
   }
 
   function startSession(data){
