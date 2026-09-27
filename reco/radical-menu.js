@@ -2,7 +2,18 @@
   const q=(s,r=document)=>r.querySelector(s);
   const qa=(s,r=document)=>Array.from(r.querySelectorAll(s));
   const ORDER=['home','search','stats'];
+  const THEME_KEY='reco.theme.v1';
   function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
+  function getTheme(){return localStorage.getItem(THEME_KEY)==='light'?'light':'dark'}
+  function applyTheme(theme){
+    const value=theme==='light'?'light':'dark';
+    document.documentElement.dataset.theme=value;
+    document.documentElement.style.colorScheme=value;
+    localStorage.setItem(THEME_KEY,value);
+    const meta=q('meta[name="theme-color"]');
+    if(meta)meta.content=value==='light'?'#f2f5f9':'#101318';
+  }
+  applyTheme(getTheme());
   function close(){q('#radicalMenu')?.remove()}
   function currentView(){
     const active=q('.view.active');
@@ -27,7 +38,13 @@
     const panel=el('div','radical-menu');
     const x=el('button','radical-close','×');x.type='button';x.onclick=close;
     const list=el('div','radical-menu-list');
+    const themeAction=action(getTheme()==='dark'?'Use light mode':'Use dark mode',()=>{
+      applyTheme(getTheme()==='dark'?'light':'dark');
+      close();
+    });
+    themeAction.setAttribute('aria-label',getTheme()==='dark'?'Switch to light mode':'Switch to dark mode');
     list.append(
+      themeAction,
       action('Sync',()=>{close();q('#syncBtn')?.click()}),
       action('Export',()=>{close();q('#exportBtn')?.click()})
     );
