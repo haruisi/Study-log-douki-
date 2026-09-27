@@ -41,10 +41,10 @@
   function fromInput(v){ return new Date(v).toISOString(); }
 
   function toast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('show'),1600); }
-  function navigate(view){ currentView=view; $$('.view').forEach(v=>v.classList.remove('active')); $(`#view-${view}`).classList.add('active'); $$('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.nav===view)); $('#fab').style.display = view==='home' ? 'block' : 'none'; render(); document.dispatchEvent(new CustomEvent('reco:view-changed',{detail:{view}})); window.scrollTo({top:0, behavior:'instant'}); }
+  function navigate(view){ const target=$(`#view-${view}`); if(!target)return; currentView=view; $$('.view').forEach(v=>v.classList.remove('active')); target.classList.add('active'); $$('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.nav===view)); $('#fab').style.display = view==='home' ? 'block' : 'none'; render(); document.dispatchEvent(new CustomEvent('reco:view-changed',{detail:{view}})); window.scrollTo({top:0, behavior:'instant'}); }
 
   function render(){
-    renderHome(); renderStart(); renderDetail(); renderSearch(); renderStats();
+    renderHome(); renderStart(); renderDetail(); renderSearch(); renderStats(); window.RecoPlan?.render();
   }
 
   function renderHome(){
