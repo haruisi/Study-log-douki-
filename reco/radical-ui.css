@@ -107,3 +107,6 @@ main{min-height:calc(100dvh - 72px)}
   border:0;
   background:transparent;
 }
+
+/* Keep the bottom navigation clear of the start form and its submit button. */
+body:has(#view-start.active) #radicalBottomNav{display:none!important}
