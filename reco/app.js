@@ -294,5 +294,11 @@
     }
   },30000);
   window.addEventListener('reco:sessions-updated',()=>{ sessions=load(STORAGE_KEY,sessions); });
+  document.addEventListener('reco:open-session', event=>{
+    const id=event.detail?.id;
+    if(!id||!sessions.some(session=>session.id===id))return;
+    detailId=id;
+    navigate('detail');
+  });
   render();
 })();

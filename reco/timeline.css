@@ -1,0 +1,45 @@
+/* Reco home: a readable study-day timeline, with 04:00 as the day boundary. */
+#view-home > .reco-timeline {
+  min-height: calc(100dvh - 72px);
+  overflow: visible;
+  padding: 20px 0 calc(150px + env(safe-area-inset-bottom));
+}
+.reco-timeline-heading { margin: 10px 0 34px; }
+.reco-timeline-kicker { color: var(--muted); font-size: 11px; letter-spacing: .18em; font-weight: 750; }
+.reco-timeline-heading h1 { margin: 8px 0 0; font-size: clamp(29px, 8vw, 39px); letter-spacing: -.055em; font-weight: 680; }
+.reco-timeline-day { margin-top: 35px; }
+.reco-timeline-day-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.reco-timeline-date h2 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -.035em; }
+.reco-timeline-date > span { display: block; margin-top: 5px; font-size: 12px; color: var(--muted); }
+.reco-timeline-total { flex: none; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; font-weight: 650; padding-bottom: 2px; }
+.reco-timeline-empty { color: var(--muted); font-size: 14px; padding: 24px 0; margin: 0; }
+.reco-timeline-row { display: grid; grid-template-columns: 48px 18px minmax(0, 1fr); gap: 0 10px; min-height: 86px; }
+.reco-timeline-time { color: var(--muted); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; padding-top: 23px; }
+.reco-timeline-marker { position: relative; width: 1px; background: var(--line); justify-self: center; }
+.reco-timeline-marker::before { content: ''; position: absolute; top: 27px; left: 50%; transform: translateX(-50%); width: 7px; height: 7px; border-radius: 50%; background: var(--text); box-shadow: 0 0 0 4px var(--bg); }
+.reco-timeline-row.is-log .reco-timeline-marker::before { width: 7px; height: 7px; background: var(--bg); border: 1px solid var(--muted); }
+.reco-timeline-body { min-width: 0; padding: 18px 0 22px; border-bottom: 1px solid var(--line); }
+.reco-timeline-entry { display: block; width: 100%; padding: 0; border: 0; background: none; color: var(--text); text-align: left; cursor: pointer; }
+.reco-timeline-entry-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.reco-timeline-entry-head strong { font-size: 17px; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.reco-timeline-length { flex: none; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.reco-timeline-resource, .reco-timeline-range, .reco-timeline-content { display: block; overflow-wrap: anywhere; line-height: 1.5; }
+.reco-timeline-resource { margin-top: 5px; font-size: 14px; color: var(--text); }
+.reco-timeline-range { margin-top: 5px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.reco-timeline-content { margin-top: 7px; font-size: 14px; white-space: pre-wrap; }
+.reco-timeline-details { margin-top: 10px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.reco-timeline-details summary { cursor: pointer; width: max-content; max-width: 100%; padding: 7px 0; }
+.reco-timeline-details p { margin: 5px 0 10px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
+.reco-timeline-more { border: 0; background: none; color: var(--text); font-size: 14px; padding: 25px 0; cursor: pointer; }
+.reco-timeline-active { position: relative; display: grid; gap: 12px; margin: 0 0 35px; padding: 18px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
+.reco-timeline-active-main { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; width: 100%; border: 0; padding: 0; background: transparent; color: var(--text); text-align: left; cursor: pointer; }
+.reco-timeline-active-main strong { font-size: 19px; }
+.reco-timeline-active-main > span:not(.reco-timeline-live) { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.reco-timeline-live { color: #34d27b; font-size: 12px; font-weight: 750; }
+.reco-timeline-active .radical-active-time { margin: 4px 0 0; transform: none; opacity: 1; font-size: 17px; color: var(--text); }
+.reco-timeline-active .radical-update-panel { position: static; display: grid; gap: 8px; padding: 0; }
+.reco-timeline-active .radical-update-input { max-height: 160px; }
+.reco-timeline-active .radical-update-submit { min-height: 44px; }
+.reco-timeline-finish { justify-self: start; border: 0; background: transparent; color: var(--text); text-decoration: underline; text-underline-offset: 4px; padding: 9px 0; font-size: 14px; cursor: pointer; }
+.reco-timeline .radical-new { position: fixed; right: max(24px, calc(50vw - 336px)); bottom: max(84px, calc(env(safe-area-inset-bottom) + 68px)); z-index: 170; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: var(--accent-text); font-size: 30px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+@media (max-width: 420px) { .reco-timeline-row { grid-template-columns: 42px 14px minmax(0,1fr); gap: 0 7px; } .reco-timeline-entry-head strong { font-size: 16px; } .reco-timeline-length { font-size: 12px; } }

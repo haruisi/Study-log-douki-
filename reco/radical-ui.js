@@ -1,5 +1,6 @@
 (() => {
   const SESSION_KEY = 'reco.sessions.v1';
+  const LOG_KEY = 'reco.logs.v1';
   const RESOURCE_KEY = 'reco.resources.v1';
   const DAY_START = 4;
   const subjects = ['数学','英語','物理','化学','国語','地理','その他'];
@@ -8,7 +9,6 @@
   const qa = (s, root=document) => Array.from(root.querySelectorAll(s));
   const pad = n => String(n).padStart(2,'0');
   let signature = '';
-  let revealTimer;
 
   function read(key, fallback){
     try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
@@ -16,19 +16,14 @@
   }
   function all(){ return read(SESSION_KEY, []); }
   function active(){ return all().find(item => !item.endedAt) || null; }
-  function anchor(){
-    const d = new Date();
-    if (d.getHours() < DAY_START) d.setDate(d.getDate()-1);
-    d.setHours(DAY_START,0,0,0);
-    return d;
+  function dayKey(value){
+    const d = new Date(value);
+    d.setHours(d.getHours()-DAY_START);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   }
-  function today(){
-    const start = anchor();
-    const end = new Date(start.getTime()+86400000);
-    return all().filter(item => {
-      const t = new Date(item.startedAt);
-      return t >= start && t < end;
-    }).sort((a,b) => new Date(a.startedAt)-new Date(b.startedAt));
+  function dayLabel(key){
+    const d = new Date(`${key}T12:00:00`);
+    return `${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
   }
   function minutes(item){
     const end = item.endedAt ? new Date(item.endedAt) : new Date();
@@ -61,8 +56,14 @@
     return qa(selector).find(node => node.dataset[key] === value);
   }
 
-  function openDetail(id){ originalByData('#view-home [data-open]','open',id)?.click(); }
-  function finish(id){ originalByData('#view-home [data-finish]','finish',id)?.click(); }
+  function openDetail(id){
+    document.dispatchEvent(new CustomEvent('reco:open-session',{detail:{id}}));
+  }
+  function finish(id){
+    const button=originalByData('#view-home [data-finish]','finish',id);
+    if(button)button.click();
+    else{openDetail(id);q('#view-detail [data-finish]')?.click();}
+  }
 
   function lastResource(subject){
     const recent = all().filter(item => item.subject === subject && item.resource)
@@ -124,51 +125,90 @@
     requestAnimationFrame(()=>overlay.classList.add('open'));
   }
 
-  function renderIdle(surface, items){
+  function renderIdle(surface, items, logs, current){
     surface.replaceChildren();
-    surface.className='radical-surface is-idle';
-    const d=anchor();
-    const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    const weekdays=['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    const date=el('button','radical-date'); date.type='button';
-    date.append(el('span','radical-day',pad(d.getDate())));
-    const meta=el('span','radical-month');
-    meta.append(document.createTextNode(months[d.getMonth()]),document.createElement('br'),document.createTextNode(weekdays[d.getDay()]));
-    const total=el('span','radical-total',clock(items.reduce((sum,item)=>sum+(item.endedAt?minutes(item):0),0)));
-    total.id='radicalTotal';
-    date.append(meta,total);
-    date.onclick=()=>{ total.classList.add('show'); clearTimeout(revealTimer); revealTimer=setTimeout(()=>total.classList.remove('show'),1800); };
-    surface.appendChild(date);
+    surface.className='radical-surface reco-timeline';
+    const heading=el('div','reco-timeline-heading');
+    heading.append(el('span','reco-timeline-kicker','STUDY TIMELINE'),el('h1','', '学習の記録'));
+    surface.appendChild(heading);
+    if(current) renderActive(surface,current);
 
-    const field=el('div','radical-field');
-    if (!items.length) field.appendChild(el('div','radical-empty','Nothing yet.'));
-    if(items.length)field.classList.add('has-events');
+    const groups=new Map();
     items.forEach(item=>{
-      const button=el('button','radical-event'); button.type='button';
-      button.append(el('span','radical-event-time',hhmm(item.startedAt)));
-      const main=el('span','radical-event-main');
-      main.appendChild(el('strong','',label(item.subject)));
-      if(item.resource) main.appendChild(el('small','',item.resource));
-      button.appendChild(main);
-      button.onclick=()=>openDetail(item.id);
-      field.appendChild(button);
+      if(!item?.startedAt || Number.isNaN(new Date(item.startedAt).getTime()))return;
+      const key=dayKey(item.startedAt);
+      if(!groups.has(key))groups.set(key,[]);
+      groups.get(key).push({type:'session',at:item.startedAt,item});
     });
-    surface.appendChild(field);
-    const add=el('button','radical-new','＋'); add.type='button'; add.onclick=openCreate;
+    logs.forEach(item=>{
+      if(!item?.recordedAt || Number.isNaN(new Date(item.recordedAt).getTime()))return;
+      const key=dayKey(item.recordedAt);
+      if(!groups.has(key))groups.set(key,[]);
+      groups.get(key).push({type:'log',at:item.recordedAt,item});
+    });
+    const todayKey=dayKey(new Date());
+    if(!groups.has(todayKey))groups.set(todayKey,[]);
+    const keys=[...groups.keys()].filter(key=>key<=todayKey).sort().reverse().slice(0,7);
+    keys.forEach(key=>{
+      const entries=groups.get(key).sort((a,b)=>new Date(a.at)-new Date(b.at));
+      const total=entries.reduce((sum,entry)=>sum+(entry.type==='session'&&entry.item.endedAt?minutes(entry.item):0),0);
+      const section=el('section','reco-timeline-day');
+      const header=el('div','reco-timeline-day-head');
+      const name=el('h2','',key===todayKey?'今日':dayLabel(key));
+      const sub=el('span','',key===todayKey?dayLabel(key):'');
+      const title=el('div','reco-timeline-date');title.append(name,sub);
+      header.append(title,el('span','reco-timeline-total',`${Math.floor(total/60)}時間${pad(total%60)}分`));
+      section.appendChild(header);
+      if(!entries.length)section.appendChild(el('p','reco-timeline-empty','今日の記録はまだありません。＋ から始められます。'));
+      entries.forEach(({type,item})=>{
+        const row=el('div',`reco-timeline-row ${type==='log'?'is-log':''}`);
+        const at=el('time','reco-timeline-time',hhmm(type==='log'?item.recordedAt:item.startedAt));
+        const marker=el('span','reco-timeline-marker');marker.setAttribute('aria-hidden','true');
+        const body=el('div','reco-timeline-body');
+        const button=el('button','reco-timeline-entry');button.type='button';
+        const top=el('span','reco-timeline-entry-head');
+        top.append(el('strong','',item.subject||'その他'),el('span','reco-timeline-length',type==='log'?'内容の記録':item.endedAt?clock(minutes(item)):'計測中'));
+        button.appendChild(top);
+        if(item.resource)button.appendChild(el('span','reco-timeline-resource',item.resource));
+        if(type==='session'){
+          button.appendChild(el('span','reco-timeline-range',`${hhmm(item.startedAt)}〜${item.endedAt?hhmm(item.endedAt):'計測中'}`));
+          button.onclick=()=>openDetail(item.id);
+          const note=item.note?.trim();
+          const replies=Array.isArray(item.replies)?item.replies:[];
+          if(note||replies.length){
+            const details=el('details','reco-timeline-details');
+            details.appendChild(el('summary','',`メモ・途中経過 ${replies.length?`（${replies.length}件）`:''}`));
+            if(note)details.appendChild(el('p','',note));
+            replies.forEach(reply=>{if(reply.content)details.appendChild(el('p','',reply.content));});
+            body.append(button,details);
+          }else body.appendChild(button);
+        }else{
+          button.dataset.logOpen=item.id;
+          button.appendChild(el('span','reco-timeline-content',item.content||''));
+          body.appendChild(button);
+          if(item.note){const details=el('details','reco-timeline-details');details.append(el('summary','','メモを見る'),el('p','',item.note));body.appendChild(details);}
+        }
+        row.append(at,marker,body);section.appendChild(row);
+      });
+      surface.appendChild(section);
+    });
+    if(groups.size>keys.length){
+      const more=el('button','reco-timeline-more','さらに過去の記録を検索 →');
+      more.type='button';more.onclick=()=>q('.nav-item[data-nav="search"]')?.click();surface.appendChild(more);
+    }
+    const add=el('button','radical-new','＋');add.type='button';add.setAttribute('aria-label','学習を記録');add.onclick=openCreate;
     surface.appendChild(add);
   }
 
   function renderActive(surface, item){
-    surface.replaceChildren();
-    surface.className='radical-surface is-active-session';
-    surface.appendChild(el('div','radical-live-dot'));
-    const center=el('button','radical-active-center'); center.type='button';
-    center.appendChild(el('span','radical-active-subject',label(item.subject)));
-    if(item.resource) center.appendChild(el('span','radical-active-resource',item.resource));
+    const panel=el('section','reco-timeline-active');
+    const center=el('button','reco-timeline-active-main');center.type='button';center.onclick=()=>openDetail(item.id);
+    center.appendChild(el('span','reco-timeline-live','● 勉強中'));
+    center.appendChild(el('strong','',item.subject||'その他'));
+    if(item.resource)center.appendChild(el('span','',item.resource));
     const elapsed=el('span','radical-active-time',clock(minutes(item)));
     center.appendChild(elapsed);
-    center.onclick=()=>{ elapsed.textContent=clock(minutes(item)); elapsed.classList.add('show'); clearTimeout(revealTimer); revealTimer=setTimeout(()=>elapsed.classList.remove('show'),2200); };
-    surface.appendChild(center);
+    panel.appendChild(center);
     const update=el('form','radical-update-panel');
     update.setAttribute('aria-label','勉強の進捗を記録');
     const labelEl=el('label','radical-update-label','途中経過・終わった内容');
@@ -198,22 +238,23 @@
       status.textContent=`追加しました（返信 ${session.replies.length} 件）`;
       input.focus();
     };
-    surface.appendChild(update);
-    const done=el('button','radical-finish-hint','↑ finish'); done.type='button'; done.onclick=()=>finish(item.id);
-    surface.appendChild(done);
+    panel.appendChild(update);
+    const done=el('button','reco-timeline-finish','勉強を終了');done.type='button';done.onclick=()=>finish(item.id);
+    panel.appendChild(done);
+    surface.appendChild(panel);
   }
 
   function render(){
     const surface=getSurface(); if(!surface) return;
-    const current=active(), items=today();
-    const next=JSON.stringify([current&&[current.id,current.subject,current.resource],items.map(x=>[x.id,x.startedAt,x.endedAt,x.subject,x.resource])]);
+    const items=all(),current=items.find(item=>!item.endedAt)||null,logs=read(LOG_KEY,[]);
+    const next=JSON.stringify([dayKey(new Date()),items.map(x=>[x.id,x.startedAt,x.endedAt,x.subject,x.resource,x.note,x.replies]),logs]);
     if(next===signature && surface.childElementCount){
       const elapsed=q('#radicalSurface .radical-active-time');
       if(current&&elapsed)elapsed.textContent=clock(minutes(current));
       return;
     }
     signature=next;
-    current ? renderActive(surface,current) : renderIdle(surface,items);
+    renderIdle(surface,items,logs,current);
   }
 
   document.addEventListener('reco:view-changed',()=>{signature='';render();});
@@ -221,6 +262,8 @@
     if(event.target.closest('[data-finish],#fab')) setTimeout(()=>{signature='';render();},0);
   },true);
   window.addEventListener('storage',()=>{signature='';render();});
+  window.addEventListener('reco:logs-updated',()=>{signature='';render();});
+  window.addEventListener('reco:sessions-updated',()=>{signature='';render();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){signature='';render();}});
   setInterval(render,1000);
   setTimeout(render,0);
