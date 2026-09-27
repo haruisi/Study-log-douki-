@@ -223,3 +223,26 @@ html[data-theme="light"] .radical-live-dot{background:#008a43;box-shadow:0 0 0 5
 .radical-surface.is-idle .radical-field.has-events{bottom:156px;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;padding:2px 2px 12px 0}
 .radical-field.has-events .radical-event{position:relative;top:auto;transform:none;flex:none;min-height:52px;grid-template-columns:58px minmax(0,1fr)}
 html[data-theme="light"] .radical-menu-version strong{color:#000!important}
+
+/* Let the home timeline use page scrolling, including days with many sessions. */
+#view-home>.radical-surface.is-idle{min-height:calc(100dvh - 72px);overflow:visible;padding:8px 0 170px}
+.radical-surface.is-idle .radical-date{position:relative;left:auto;top:auto}
+.radical-surface.is-idle .radical-field,
+.radical-surface.is-idle .radical-field.has-events{
+  position:relative;inset:auto;bottom:auto;display:flex;flex-direction:column;
+  gap:0;overflow:visible;margin-top:clamp(48px,10vh,90px);padding:0
+}
+.radical-surface.is-idle .radical-event{
+  position:relative;top:auto;left:auto;transform:none;flex:none;min-height:0;
+  grid-template-columns:58px minmax(0,1fr);gap:10px;padding:14px 0 18px
+}
+.radical-surface.is-idle .radical-event+.radical-event{border-top:1px solid var(--line)}
+.radical-surface.is-idle .radical-event-time{font-size:13px;font-weight:600;line-height:1.4}
+.radical-surface.is-idle .radical-event-main strong{font-weight:600;line-height:1.25}
+.radical-surface.is-idle .radical-event-main small{font-size:13px;line-height:1.4;margin-top:5px}
+.radical-surface.is-idle .radical-empty{position:relative;left:auto;top:auto;margin-top:12vh}
+.radical-surface.is-idle .radical-new{
+  position:fixed;right:max(24px,calc(50vw - 336px));
+  bottom:max(84px,calc(env(safe-area-inset-bottom) + 68px));
+  z-index:170
+}
