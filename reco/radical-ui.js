@@ -207,7 +207,7 @@
     const surface=getSurface(); if(!surface) return;
     const current=active(), items=today();
     const next=JSON.stringify([current&&[current.id,current.subject,current.resource],items.map(x=>[x.id,x.startedAt,x.endedAt,x.subject,x.resource])]);
-    if(next===signature){
+    if(next===signature && surface.childElementCount){
       const elapsed=q('#radicalSurface .radical-active-time');
       if(current&&elapsed)elapsed.textContent=clock(minutes(current));
       return;
@@ -216,8 +216,9 @@
     current ? renderActive(surface,current) : renderIdle(surface,items);
   }
 
+  document.addEventListener('reco:view-changed',()=>{signature='';render();});
   document.addEventListener('click',event=>{
-    if(event.target.closest('[data-nav],[data-finish],#fab')) setTimeout(()=>{signature='';render();},0);
+    if(event.target.closest('[data-finish],#fab')) setTimeout(()=>{signature='';render();},0);
   },true);
   window.addEventListener('storage',()=>{signature='';render();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){signature='';render();}});
