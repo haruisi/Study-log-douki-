@@ -293,5 +293,6 @@
       render();
     }
   },30000);
+  window.addEventListener('reco:sessions-updated',()=>{ sessions=load(STORAGE_KEY,sessions); });
   render();
 })();
