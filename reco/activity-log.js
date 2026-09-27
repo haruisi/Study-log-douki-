@@ -141,7 +141,7 @@
         <div class="field"><label>日時</label><input id="logRecordedAt" class="input" type="datetime-local" value="${nowLocal()}" required></div>
         <div class="field"><label>科目</label><div class="subject-grid">${subjectGrid(initialSubject)}</div></div>
         <div class="field"><label>教材</label><input id="logResource" class="input" list="logResourceList" placeholder="例：名問の森"><datalist id="logResourceList"></datalist><div id="logResourceQuick" class="quick-row"></div></div>
-        <div class="field"><label>やったこと</label><textarea id="logContent" class="input" placeholder="例：83〜87を解いた / 構造決定252を復習" required></textarea></div>
+        <div class="field"><label>やったこと（任意）</label><textarea id="logContent" class="input" placeholder="例：83〜87を解いた / 構造決定252を復習"></textarea></div>
         <div class="field"><label>メモ（任意）</label><textarea id="logNote" class="input" placeholder="気づき・次にやること"></textarea></div>
         <div class="modal-actions"><button class="btn btn-primary" type="submit">記録する</button><button id="cancelLog" class="btn btn-secondary" type="button">キャンセル</button></div>
       </form>
@@ -153,10 +153,6 @@
     $('#logForm', root).onsubmit = event => {
       event.preventDefault();
       const content = $('#logContent', root).value.trim();
-      if (!content) {
-        toast('やったことを入力してください');
-        return;
-      }
       const resource = $('#logResource', root).value.trim();
       const subject = getSubject();
       const log = {
@@ -187,7 +183,7 @@
         <div class="field"><label>日時</label><input id="logRecordedAt" class="input" type="datetime-local" value="${toInputValue(log.recordedAt)}" required></div>
         <div class="field"><label>科目</label><div class="subject-grid">${subjectGrid(log.subject)}</div></div>
         <div class="field"><label>教材</label><input id="logResource" class="input" list="logResourceList" value="${esc(log.resource || '')}"><datalist id="logResourceList"></datalist><div id="logResourceQuick" class="quick-row"></div></div>
-        <div class="field"><label>やったこと</label><textarea id="logContent" class="input" required>${esc(log.content || '')}</textarea></div>
+        <div class="field"><label>やったこと（任意）</label><textarea id="logContent" class="input">${esc(log.content || '')}</textarea></div>
         <div class="field"><label>メモ（任意）</label><textarea id="logNote" class="input">${esc(log.note || '')}</textarea></div>
         <div class="modal-actions"><button class="btn btn-primary" type="submit">保存</button><button id="deleteLog" class="btn btn-danger" type="button">削除</button><button id="cancelLog" class="btn btn-secondary" type="button">キャンセル</button></div>
       </form>
@@ -199,10 +195,6 @@
     $('#editLogForm', root).onsubmit = event => {
       event.preventDefault();
       const content = $('#logContent', root).value.trim();
-      if (!content) {
-        toast('やったことを入力してください');
-        return;
-      }
       log.recordedAt = fromInput($('#logRecordedAt', root).value);
       log.subject = getSubject();
       log.resource = $('#logResource', root).value.trim();
@@ -235,7 +227,7 @@
     return `<article class="card activity-log-card" data-log-open="${log.id}">
       <div class="row" style="gap:8px;flex-wrap:wrap"><span class="subject-badge">${esc(log.subject)}</span><span class="time">${fmtTime(log.recordedAt)}</span><span class="activity-log-type">DONE</span></div>
       ${log.resource ? `<div class="resource">${esc(log.resource)}</div>` : ''}
-      <div class="activity-log-content">${esc(log.content)}</div>
+      ${log.content ? `<div class="activity-log-content">${esc(log.content)}</div>` : ''}
       ${log.note ? `<div class="activity-log-note">${esc(log.note)}</div>` : ''}
     </article>`;
   }
