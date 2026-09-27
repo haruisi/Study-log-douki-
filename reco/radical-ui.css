@@ -147,19 +147,19 @@ body:has(#view-start.active) #radicalBottomNav{display:none!important}
 }
 :root[data-theme="light"]{
   color-scheme:light;
-  --bg:#f2f5f9;
+  --bg:#ffffff;
   --surface:#ffffff;
-  --surface-2:#e8edf3;
+  --surface-2:#f2f2f2;
   --field-bg:#ffffff;
-  --text:#17212f;
-  --muted:#4c5b6d;
-  --line:#c5ced9;
-  --accent:#183153;
+  --text:#000000;
+  --muted:#303030;
+  --line:#b8b8b8;
+  --accent:#000000;
   --accent-text:#ffffff;
-  --accent-soft:#e2e9f2;
+  --accent-soft:#f2f2f2;
   --danger:#a62929;
-  --overlay:rgba(20,31,46,.50);
-  --shadow:0 8px 24px rgba(23,33,47,.10);
+  --overlay:rgba(0,0,0,.24);
+  --shadow:none;
 }
 html[data-theme],html[data-theme] body{background:var(--bg)!important;color:var(--text)!important}
 html[data-theme="dark"] body{color-scheme:dark}
@@ -203,3 +203,10 @@ html[data-theme] .toast{background:var(--accent)!important;color:var(--accent-te
 :root[data-theme="dark"]{--focus:#79b8ff}
 :root[data-theme="light"]{--focus:#145fb8}
 html[data-theme] :focus-visible{outline:3px solid var(--focus)!important;outline-offset:3px}
+
+/* Light mode keeps the entire canvas white and primary copy black. */
+html[data-theme="light"] .radical-new{color:var(--text)!important}
+html[data-theme="light"] .searchbar{background:var(--bg)!important}
+html[data-theme="light"] .radical-update-input::placeholder,
+html[data-theme="light"] .input::placeholder{color:var(--muted)!important;opacity:1}
+html[data-theme="light"] .radical-live-dot{background:#008a43;box-shadow:0 0 0 5px rgba(0,138,67,.12)}
