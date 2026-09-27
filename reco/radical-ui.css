@@ -82,3 +82,28 @@ main{min-height:calc(100dvh - 72px)}
   .radical-day{font-size:54px}
   .radical-event-main strong{font-size:19px}
 }
+
+
+/* The subject picker routes to the regular start form. Keep that view visible
+   in the radical layout so a session can actually be started. */
+#view-start.active{
+  display:block!important;
+  padding:12px 0 40px;
+  min-height:calc(100dvh - 84px);
+}
+#view-start .form-card{
+  display:grid;
+  gap:18px;
+}
+#view-start .subject-chip{
+  min-height:48px;
+}
+#view-start .quick{
+  color:var(--text);
+  background:#0d0e10;
+  border-color:#26272d;
+}
+#view-start .back{
+  border:0;
+  background:transparent;
+}
