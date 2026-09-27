@@ -48,10 +48,47 @@
       action('Sync',()=>{close();q('#syncBtn')?.click()}),
       action('Export',()=>{close();q('#exportBtn')?.click()})
     );
+    const currentVersion=q('.version-badge')?.textContent?.trim()||'—';
     const version=el('div','radical-menu-version');
-    version.setAttribute('aria-label','現在のバージョン');
-    version.append('Version ',el('strong','',q('.version-badge')?.textContent?.trim()||'—'));
+    version.setAttribute('aria-label','表示中のバージョン');
+    version.append('Version ',el('strong','',currentVersion));
+    const versionStatus=el('div','radical-menu-version-status');
+    const checkVersion=action('更新を確認',async()=>{
+      checkVersion.disabled=true;
+      versionStatus.textContent='確認中…';
+      try{
+        const response=await fetch('./?reco_version_check='+Date.now(),{cache:'no-store'});
+        if(!response.ok)throw new Error('Failed to check version');
+        const latest=new DOMParser().parseFromString(await response.text(),'text/html')
+          .querySelector('.version-badge')?.textContent?.trim();
+        if(!latest)throw new Error('Version not found');
+        if(!version.isConnected)return;
+        const parts=v=>v.replace(/^v/,'').split('.').map(Number);
+        const a=parts(latest),b=parts(currentVersion);
+        const newer=a.some((n,i)=>n>b[i]&&a.slice(0,i).every((x,j)=>x===b[j]));
+        if(newer){
+          versionStatus.textContent='最新版 '+latest+' が利用できます';
+          const update=action('更新する',()=>{
+            location.assign('./?v='+encodeURIComponent(latest)+'&reload='+Date.now());
+          });
+          version.appendChild(update);
+        }else{
+          versionStatus.textContent='最新版です';
+        }
+      }catch(error){
+        versionStatus.textContent='確認できませんでした。通信状態を確認してください';
+      }finally{
+        checkVersion.disabled=false;
+      }
+    });
+    version.append(checkVersion,versionStatus);
     list.appendChild(version);
+    if(getTheme()==='light'){
+      panel.style.setProperty('background','#fff','important');
+      panel.style.setProperty('color','#000','important');
+      x.style.setProperty('color','#000','important');
+      list.querySelectorAll('button').forEach(b=>b.style.setProperty('color','#000','important'));
+    }
     panel.append(x,list);overlay.appendChild(panel);
     overlay.onclick=e=>{if(e.target===overlay)close()};
     document.body.appendChild(overlay);requestAnimationFrame(()=>overlay.classList.add('open'));
