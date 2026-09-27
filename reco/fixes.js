@@ -157,7 +157,8 @@ function applyClockVisibility() {
 // Pure-black dark mode. Intentionally avoid setting a global CSS color-scheme so iPadOS
 // is not explicitly asked to switch native status-bar text to the light appearance.
 const DARK_MODE_KEY = 'reco.darkMode.v1';
-let darkModeEnabled = localStorage.getItem(DARK_MODE_KEY) === 'true';
+const savedTheme = localStorage.getItem('reco.theme.v1');
+let darkModeEnabled = savedTheme === 'light' ? false : savedTheme === 'dark' ? true : localStorage.getItem(DARK_MODE_KEY) === 'true';
 
 const darkModeStyle = document.createElement('style');
 darkModeStyle.textContent = `
