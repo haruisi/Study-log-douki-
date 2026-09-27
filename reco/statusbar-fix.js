@@ -1,7 +1,7 @@
 // Keep Safari/iPadOS chrome on the light appearance while Reco itself can be dark.
 // This is intentionally separate from the app theme: dark mode paints only the web content.
 (() => {
-  const LIGHT_THEME_COLOR = '#f6f7fb';
+  const LIGHT_THEME_COLOR = '#ffffff';
 
   const keepSystemChromeLight = () => {
     document.documentElement.style.colorScheme = 'light';
