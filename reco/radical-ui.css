@@ -189,3 +189,17 @@ html[data-theme] .modal p,html[data-theme] .field label,html[data-theme] .back{c
 html[data-theme] .bar-track{background:var(--surface-2)!important}
 html[data-theme] .bar{background:var(--accent)!important}
 html[data-theme] .radical-toast{background:var(--accent)!important;color:var(--accent-text)!important}
+
+
+/* Ensure secondary copy and native controls keep readable contrast in both themes. */
+html[data-theme] .resource,
+html[data-theme] .duration,
+html[data-theme] .section-head span,
+html[data-theme] .reply-count,
+html[data-theme] .field label,
+html[data-theme] .reply time{color:var(--muted)!important}
+html[data-theme] #view-start .quick{background:var(--surface)!important;border-color:var(--line)!important;color:var(--text)!important}
+html[data-theme] .toast{background:var(--accent)!important;color:var(--accent-text)!important}
+:root[data-theme="dark"]{--focus:#79b8ff}
+:root[data-theme="light"]{--focus:#145fb8}
+html[data-theme] :focus-visible{outline:3px solid var(--focus)!important;outline-offset:3px}
