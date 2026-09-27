@@ -339,7 +339,7 @@ function applyDarkMode() {
   document.body.classList.toggle('reco-dark', darkModeEnabled);
 
   const themeColor = document.querySelector('meta[name="theme-color"]');
-  if (themeColor) themeColor.content = darkModeEnabled ? '#000000' : '#f6f7fb';
+  if (themeColor) themeColor.content = darkModeEnabled ? '#000000' : '#ffffff';
 
   if (button) {
     button.dataset.state = darkModeEnabled ? 'on' : 'off';
