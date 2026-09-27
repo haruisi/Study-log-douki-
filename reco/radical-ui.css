@@ -210,3 +210,7 @@ html[data-theme="light"] .searchbar{background:var(--bg)!important}
 html[data-theme="light"] .radical-update-input::placeholder,
 html[data-theme="light"] .input::placeholder{color:var(--muted)!important;opacity:1}
 html[data-theme="light"] .radical-live-dot{background:#008a43;box-shadow:0 0 0 5px rgba(0,138,67,.12)}
+
+/* Current version is tucked into the three-dot menu. */
+.radical-menu-version{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);width:100%;font-size:14px;font-weight:550;letter-spacing:.01em;color:var(--muted)}
+.radical-menu-version strong{color:var(--text);font-weight:700;margin-left:6px}
