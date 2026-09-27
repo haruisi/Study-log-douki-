@@ -142,13 +142,9 @@
 
     const field=el('div','radical-field');
     if (!items.length) field.appendChild(el('div','radical-empty','Nothing yet.'));
-    const base=anchor().getTime();
-    let previous=13;
+    if(items.length)field.classList.add('has-events');
     items.forEach(item=>{
-      const raw=13+((new Date(item.startedAt).getTime()-base)/86400000)*68;
-      const top=Math.min(Math.max(raw,previous),82); previous=top+8.2;
       const button=el('button','radical-event'); button.type='button';
-      button.style.setProperty('--event-y',`${top}%`);
       button.append(el('span','radical-event-time',hhmm(item.startedAt)));
       const main=el('span','radical-event-main');
       main.appendChild(el('strong','',label(item.subject)));
