@@ -214,3 +214,7 @@ html[data-theme="light"] .radical-live-dot{background:#008a43;box-shadow:0 0 0 5
 /* Current version is tucked into the three-dot menu. */
 .radical-menu-version{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);width:100%;font-size:14px;font-weight:550;letter-spacing:.01em;color:var(--muted)}
 .radical-menu-version strong{color:var(--text);font-weight:700;margin-left:6px}
+
+.radical-menu-version button{display:block;margin-top:12px;padding:8px 0;border:0;background:transparent;color:var(--text)!important;font-size:15px;font-weight:700;letter-spacing:0;text-align:left}
+.radical-menu-version button:disabled{opacity:.55}
+.radical-menu-version-status{min-height:20px;margin-top:8px;font-size:13px;line-height:1.5;color:var(--muted)}
