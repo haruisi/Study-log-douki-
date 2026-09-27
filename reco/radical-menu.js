@@ -10,6 +10,9 @@
     document.documentElement.dataset.theme=value;
     document.documentElement.style.colorScheme=value;
     localStorage.setItem(THEME_KEY,value);
+    localStorage.setItem('reco.darkMode.v1',String(value==='dark'));
+    document.documentElement.classList.remove('reco-dark-root');
+    document.body.classList.remove('reco-dark');
     const meta=q('meta[name="theme-color"]');
     if(meta)meta.content=value==='light'?'#ffffff':'#101318';
   }
