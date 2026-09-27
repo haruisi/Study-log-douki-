@@ -95,7 +95,7 @@
         toast('返信を追加しました');
       };
     }
-    $('[data-finish]',el).forEach(b=>b.onclick=e=>{ e.stopPropagation(); finishModal(b.dataset.finish); });
+    $$('[data-finish]',el).forEach(b=>b.onclick=e=>{ e.stopPropagation(); finishModal(b.dataset.finish); });
   }
 
   function sessionCard(s){
@@ -140,7 +140,7 @@
     updateResources();
     if(last) $('#repeatLast',el).onclick=()=>{
       selected=last.subject;
-      $('.subject-chip',el).forEach(x=>x.classList.toggle('selected',x.dataset.subject===selected));
+      $$('.subject-chip',el).forEach(x=>x.classList.toggle('selected',x.dataset.subject===selected));
       updateResources();
       $('#resource',el).value=last.resource||'';
       $('#note',el).value=last.note||'';
