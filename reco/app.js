@@ -65,6 +65,11 @@
           </div>
           <button class="btn btn-primary" data-finish="${active.id}">終了</button>
         </div>
+        <form id="activeReplyForm" style="display:grid;gap:8px;margin-top:16px">
+          <label for="activeReplyInput" style="font-size:12px;font-weight:800;color:#c9ced9">途中経過・終わった内容</label>
+          <textarea id="activeReplyInput" class="input" rows="2" placeholder="例：名問の森 〇番まで完了。残りは〜" style="resize:vertical;min-height:64px"></textarea>
+          <button class="btn btn-primary" type="submit">記録に追加</button>
+        </form>
       </div>` : `
       <div class="card empty">
         <strong>まだ勉強中のセッションはありません</strong><br><br>
@@ -75,7 +80,22 @@
         ${today.length ? today.map(sessionCard).join('') : '<div class="empty">今日の記録はまだありません。</div>'}
       </div>`;
     bindSessionCards(el);
-    $$('[data-finish]',el).forEach(b=>b.onclick=e=>{ e.stopPropagation(); finishModal(b.dataset.finish); });
+    const activeReplyForm=$('#activeReplyForm',el);
+    if(activeReplyForm){
+      activeReplyForm.onclick=e=>e.stopPropagation();
+      activeReplyForm.onsubmit=e=>{
+        e.preventDefault();
+        const input=$('#activeReplyInput',el);
+        const content=input.value.trim();
+        if(!content)return;
+        active.replies=active.replies||[];
+        active.replies.push({id:uid(),content,createdAt:new Date().toISOString()});
+        save();
+        renderHome();
+        toast('返信を追加しました');
+      };
+    }
+    $('[data-finish]',el).forEach(b=>b.onclick=e=>{ e.stopPropagation(); finishModal(b.dataset.finish); });
   }
 
   function sessionCard(s){
