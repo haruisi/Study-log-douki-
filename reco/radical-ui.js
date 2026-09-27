@@ -197,6 +197,7 @@
       session.replies=Array.isArray(session.replies)?session.replies:[];
       session.replies.push({id:globalThis.crypto?.randomUUID?.()||String(Date.now()),content,createdAt:new Date().toISOString()});
       localStorage.setItem(SESSION_KEY,JSON.stringify(sessions));
+      window.dispatchEvent(new CustomEvent('reco:sessions-updated'));
       input.value='';
       status.textContent=`追加しました（返信 ${session.replies.length} 件）`;
       input.focus();
