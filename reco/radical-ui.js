@@ -173,6 +173,35 @@
     center.appendChild(elapsed);
     center.onclick=()=>{ elapsed.textContent=clock(minutes(item)); elapsed.classList.add('show'); clearTimeout(revealTimer); revealTimer=setTimeout(()=>elapsed.classList.remove('show'),2200); };
     surface.appendChild(center);
+    const update=el('form','radical-update-panel');
+    update.setAttribute('aria-label','勉強の進捗を記録');
+    const labelEl=el('label','radical-update-label','途中経過・終わった内容');
+    labelEl.htmlFor='radicalUpdateInput';
+    const input=el('textarea','input radical-update-input');
+    input.id='radicalUpdateInput'; input.rows=2;
+    input.placeholder='例：名問の森 〇番まで完了。残りは〜';
+    input.setAttribute('aria-label','途中経過・終わった内容');
+    const submit=el('button','btn btn-primary radical-update-submit','記録に追加');
+    submit.type='submit';
+    const status=el('div','radical-update-status');
+    status.id='radicalUpdateStatus'; status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
+    update.append(labelEl,input,submit,status);
+    update.onclick=event=>event.stopPropagation();
+    update.onsubmit=event=>{
+      event.preventDefault(); event.stopPropagation();
+      const content=input.value.trim();
+      if(!content){input.focus();return;}
+      const sessions=all();
+      const session=sessions.find(entry=>entry.id===item.id&&!entry.endedAt);
+      if(!session){status.textContent='進行中の記録が見つかりません。';return;}
+      session.replies=Array.isArray(session.replies)?session.replies:[];
+      session.replies.push({id:globalThis.crypto?.randomUUID?.()||String(Date.now()),content,createdAt:new Date().toISOString()});
+      localStorage.setItem(SESSION_KEY,JSON.stringify(sessions));
+      input.value='';
+      status.textContent=`追加しました（返信 ${session.replies.length} 件）`;
+      input.focus();
+    };
+    surface.appendChild(update);
     const done=el('button','radical-finish-hint','↑ finish'); done.type='button'; done.onclick=()=>finish(item.id);
     surface.appendChild(done);
   }
@@ -180,8 +209,12 @@
   function render(){
     const surface=getSurface(); if(!surface) return;
     const current=active(), items=today();
-    const next=JSON.stringify([current&&[current.id,current.subject,current.resource,minutes(current)],items.map(x=>[x.id,x.startedAt,x.endedAt,x.subject,x.resource])]);
-    if(next===signature)return;
+    const next=JSON.stringify([current&&[current.id,current.subject,current.resource],items.map(x=>[x.id,x.startedAt,x.endedAt,x.subject,x.resource])]);
+    if(next===signature){
+      const elapsed=q('#radicalSurface .radical-active-time');
+      if(current&&elapsed)elapsed.textContent=clock(minutes(current));
+      return;
+    }
     signature=next;
     current ? renderActive(surface,current) : renderIdle(surface,items);
   }
