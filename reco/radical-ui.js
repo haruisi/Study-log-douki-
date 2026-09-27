@@ -132,6 +132,7 @@
     heading.append(el('span','reco-timeline-kicker','STUDY TIMELINE'),el('h1','', '学習の記録'));
     surface.appendChild(heading);
     if(current) renderActive(surface,current);
+    window.RecoPlan?.renderHomeTeaser(surface);
 
     const groups=new Map();
     items.forEach(item=>{

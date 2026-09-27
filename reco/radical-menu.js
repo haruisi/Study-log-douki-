@@ -1,7 +1,7 @@
 (() => {
   const q=(s,r=document)=>r.querySelector(s);
   const qa=(s,r=document)=>Array.from(r.querySelectorAll(s));
-  const ORDER=['home','search','stats'];
+  const ORDER=['home','plan','search','stats'];
   const THEME_KEY='reco.theme.v1';
   function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
   function getTheme(){return localStorage.getItem(THEME_KEY)==='light'?'light':'dark'}
@@ -23,6 +23,7 @@
     if(!active)return 'home';
     if(active.id==='view-search')return 'search';
     if(active.id==='view-stats')return 'stats';
+    if(active.id==='view-plan')return 'plan';
     return 'home';
   }
   function syncBottomNav(){
@@ -103,7 +104,7 @@
   function installBottomNav(){
     if(q('#radicalBottomNav'))return;
     const navEl=el('nav','radical-bottom-nav');navEl.id='radicalBottomNav';navEl.setAttribute('aria-label','メインナビゲーション');
-    [['home','Home'],['search','Search'],['stats','Insights']].forEach(([view,label])=>{
+    [['home','Home'],['plan','Plan'],['search','Search'],['stats','Insights']].forEach(([view,label])=>{
       const b=el('button','radical-bottom-item',label);b.type='button';b.dataset.radicalNav=view;b.onclick=()=>nav(view);navEl.appendChild(b);
     });
     document.body.appendChild(navEl);syncBottomNav();
