@@ -57,7 +57,7 @@
   const goals = [{subject:'国語',score:'30 / 80'},{subject:'数学',score:'35〜40 / 120'},{subject:'英語',score:'45〜50 / 120'},{subject:'物理',score:'35〜40 / 60'},{subject:'化学',score:'25〜30 / 60'}];
   let tab='week', selectedWeek=null, filter='すべて';
   function read(){try{const data=JSON.parse(localStorage.getItem(KEY));return data && typeof data==='object' && !Array.isArray(data)?data:{}}catch{return {}}}
-  function today(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
+  function today(){const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));return `${parts.year}-${parts.month}-${parts.day}`;}
   function currentWeek(){const d=today();return weeks.find(w=>w.start<=d && d<=w.end)|| (d<weeks[0].start?weeks[0]:weeks.at(-1));}
   function level(progress,week,item){return Math.max(0,Math.min(item.kind==='count'?item.target:item.kind==='check'?1:2,Number(progress[week.id+'/'+item.id])||0))}
   function done(progress,w,item){return level(progress,w,item)===(item.kind==='count'?item.target:item.kind==='check'?1:2)}
