@@ -11,7 +11,7 @@
     document.documentElement.style.colorScheme=value;
     localStorage.setItem(THEME_KEY,value);
     const meta=q('meta[name="theme-color"]');
-    if(meta)meta.content=value==='light'?'#f2f5f9':'#101318';
+    if(meta)meta.content=value==='light'?'#ffffff':'#101318';
   }
   applyTheme(getTheme());
   function close(){q('#radicalMenu')?.remove()}
@@ -48,6 +48,10 @@
       action('Sync',()=>{close();q('#syncBtn')?.click()}),
       action('Export',()=>{close();q('#exportBtn')?.click()})
     );
+    const version=el('div','radical-menu-version');
+    version.setAttribute('aria-label','現在のバージョン');
+    version.append('Version ',el('strong','',q('.version-badge')?.textContent?.trim()||'—'));
+    list.appendChild(version);
     panel.append(x,list);overlay.appendChild(panel);
     overlay.onclick=e=>{if(e.target===overlay)close()};
     document.body.appendChild(overlay);requestAnimationFrame(()=>overlay.classList.add('open'));
