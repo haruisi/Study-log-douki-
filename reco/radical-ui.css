@@ -110,3 +110,82 @@ main{min-height:calc(100dvh - 72px)}
 
 /* Keep the bottom navigation clear of the start form and its submit button. */
 body:has(#view-start.active) #radicalBottomNav{display:none!important}
+
+
+/* Active-session progress entry: clear contrast and forgiving touch targets. */
+.radical-update-panel{position:absolute;left:0;right:0;bottom:126px;display:grid;gap:10px;padding:0 2px;z-index:3}
+.radical-update-label{color:var(--text);font-size:14px;font-weight:700;letter-spacing:.01em}
+.radical-update-input{min-height:74px;max-height:24svh;resize:vertical;font-size:16px!important;line-height:1.45;border-radius:14px!important;padding:12px 14px!important;color:var(--text)!important;background:var(--field-bg)!important;border:1px solid var(--line)!important}
+.radical-update-input::placeholder{color:var(--muted)!important;opacity:1}
+.radical-update-submit{min-height:48px;border-radius:14px!important;font-size:15px;font-weight:750;background:var(--accent)!important;color:var(--accent-text)!important}
+.radical-update-status{min-height:18px;color:var(--muted);font-size:12px;line-height:1.4}
+.radical-active-center{z-index:1}
+.radical-finish-hint{z-index:2}
+.radical-overlay{background:var(--overlay)!important}
+.radical-picker,.radical-menu{background:var(--bg)!important;color:var(--text)}
+.radical-menu-list button,.radical-picker-list button{color:var(--text)!important}
+.radical-close{color:var(--muted)}
+.radical-menu-button{color:var(--text)!important}
+@media(max-height:700px){.radical-update-panel{bottom:112px;gap:7px}.radical-update-input{min-height:58px}.radical-active-center{transform:translateY(-10vh)}}
+
+/* User-selectable palettes with distinct, readable surface and text roles. */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101318;
+  --surface:#191e26;
+  --surface-2:#252c36;
+  --field-bg:#171b22;
+  --text:#f4f6f8;
+  --muted:#b2bbc7;
+  --line:#46505d;
+  --accent:#f2f4f6;
+  --accent-text:#14181e;
+  --accent-soft:#252c36;
+  --danger:#ff837d;
+  --overlay:rgba(7,10,14,.88);
+  --shadow:none;
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f2f5f9;
+  --surface:#ffffff;
+  --surface-2:#e8edf3;
+  --field-bg:#ffffff;
+  --text:#17212f;
+  --muted:#4c5b6d;
+  --line:#c5ced9;
+  --accent:#183153;
+  --accent-text:#ffffff;
+  --accent-soft:#e2e9f2;
+  --danger:#a62929;
+  --overlay:rgba(20,31,46,.50);
+  --shadow:0 8px 24px rgba(23,33,47,.10);
+}
+html[data-theme],html[data-theme] body{background:var(--bg)!important;color:var(--text)!important}
+html[data-theme="dark"] body{color-scheme:dark}
+html[data-theme="light"] body{color-scheme:light}
+html[data-theme] .app-shell{background:var(--bg)}
+html[data-theme] .brand,html[data-theme] .radical-active-center{color:var(--text)!important}
+html[data-theme] .radical-month,html[data-theme] .radical-total,html[data-theme] .radical-event-time,html[data-theme] .radical-event-main small,html[data-theme] .radical-active-resource,html[data-theme] .radical-active-time,html[data-theme] .radical-finish-hint,html[data-theme] .radical-bottom-item:not(.active){color:var(--muted)!important}
+html[data-theme] .radical-empty{color:var(--muted)!important}
+html[data-theme] .radical-bottom-item.active{color:var(--text)!important}
+html[data-theme] .radical-event{color:var(--text)}
+html[data-theme] .radical-menu-button,html[data-theme] .radical-close{color:var(--text)!important}
+html[data-theme] .radical-overlay{background:var(--overlay)!important}
+html[data-theme] .radical-picker,html[data-theme] .radical-menu{background:var(--bg)!important;color:var(--text)!important}
+html[data-theme] .radical-picker-list button,html[data-theme] .radical-menu-list button{color:var(--text)!important}
+html[data-theme] .input{background:var(--field-bg)!important;border-color:var(--line)!important;color:var(--text)!important}
+html[data-theme] .input:focus{background:var(--surface)!important;border-color:var(--accent)!important}
+html[data-theme] .btn-primary{background:var(--accent)!important;color:var(--accent-text)!important}
+html[data-theme] .btn-secondary{background:var(--surface-2)!important;color:var(--text)!important}
+html[data-theme] .subject-chip{background:var(--surface)!important;border-color:var(--line)!important;color:var(--text)}
+html[data-theme] .subject-chip.selected,html[data-theme] .filter-chip.active{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--accent-text)!important}
+html[data-theme] .filter-chip{background:var(--surface)!important;border-color:var(--line)!important;color:var(--text)}
+html[data-theme] .subject-badge{background:var(--surface-2)!important;color:var(--text)!important}
+html[data-theme] .section-head h2{color:var(--muted)!important}
+html[data-theme] .card+.card,html[data-theme] .session-card{border-color:var(--line)!important}
+html[data-theme] .modal{background:var(--surface)!important;color:var(--text)!important;border-color:var(--line)!important}
+html[data-theme] .modal p,html[data-theme] .field label,html[data-theme] .back{color:var(--muted)!important}
+html[data-theme] .bar-track{background:var(--surface-2)!important}
+html[data-theme] .bar{background:var(--accent)!important}
+html[data-theme] .radical-toast{background:var(--accent)!important;color:var(--accent-text)!important}
