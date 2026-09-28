@@ -180,7 +180,10 @@
             const details=el('details','reco-timeline-details');
             details.appendChild(el('summary','',`メモ・途中経過 ${replies.length?`（${replies.length}件）`:''}`));
             if(note)details.appendChild(el('p','',note));
-            replies.forEach(reply=>{if(reply.content)details.appendChild(el('p','',reply.content));});
+            replies.forEach(reply=>{
+              if(reply.content)details.appendChild(el('p','',reply.content));
+              if(reply.imagePath)details.appendChild(el('p','', '📷 画像を添付'));
+            });
             body.append(button,details);
           }else body.appendChild(button);
         }else{
@@ -222,21 +225,32 @@
     submit.type='submit';
     const status=el('div','radical-update-status');
     status.id='radicalUpdateStatus'; status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
-    update.append(labelEl,input,submit,status);
+    const picker=el('div');
+    picker.innerHTML=window.RecoImages.pickerHTML();
+    update.append(labelEl,input,picker,submit,status);
+    const selectedImage=window.RecoImages.bindPicker(picker);
     update.onclick=event=>event.stopPropagation();
-    update.onsubmit=event=>{
+    update.onsubmit=async event=>{
       event.preventDefault(); event.stopPropagation();
       const content=input.value.trim();
-      if(!content){input.focus();return;}
+      const file=selectedImage();
+      if(!content&&!file){input.focus();return;}
       const sessions=all();
       const session=sessions.find(entry=>entry.id===item.id&&!entry.endedAt);
       if(!session){status.textContent='進行中の記録が見つかりません。';return;}
+      submit.disabled=true;
+      let imagePath=null;
+      try { if(file) imagePath=await window.RecoImages.upload(file,item.id); }
+      catch(error) { status.textContent=error.message||'画像を保存できませんでした'; submit.disabled=false; return; }
       session.replies=Array.isArray(session.replies)?session.replies:[];
-      session.replies.push({id:globalThis.crypto?.randomUUID?.()||String(Date.now()),content,createdAt:new Date().toISOString()});
+      session.replies.push({id:globalThis.crypto?.randomUUID?.()||String(Date.now()),content,imagePath,createdAt:new Date().toISOString()});
       localStorage.setItem(SESSION_KEY,JSON.stringify(sessions));
       window.dispatchEvent(new CustomEvent('reco:sessions-updated'));
       input.value='';
+      picker.querySelector('input[type="file"]').value='';
+      picker.querySelector('.reco-image-preview').replaceChildren();
       status.textContent=`追加しました（返信 ${session.replies.length} 件）`;
+      submit.disabled=false;
       input.focus();
     };
     panel.appendChild(update);

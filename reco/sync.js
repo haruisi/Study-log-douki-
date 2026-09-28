@@ -456,6 +456,19 @@
     if (!hasPending()) await pullRemote({ reloadIfChanged: true });
   }
 
+  window.RecoSyncImages = {
+    async ensureSession() {
+      if (!syncKey) throw new Error('端末間同期を設定してください');
+      captureLocalChanges();
+      for (let attempt = 0; attempt < 15 && syncBusy; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      if (syncBusy) throw new Error('同期が完了してからもう一度お試しください');
+      await flushPending();
+      if (hasPending()) throw new Error('同期が完了してからもう一度お試しください');
+    }
+  };
+
   setInterval(() => {
     if (!syncKey) return;
     if (captureLocalChanges()) scheduleFlush();
