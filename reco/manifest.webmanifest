@@ -3,7 +3,7 @@
   "short_name": "Reco",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f6f7fb",
-  "theme_color": "#f6f7fb",
+  "background_color": "#000000",
+  "theme_color": "#101318",
   "description": "Fast study session logging with replies and stats"
 }

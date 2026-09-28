@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#101318" />
   <meta name="color-scheme" content="dark light" />
   <title>Reco</title>
-  <link rel="manifest" href="manifest.webmanifest?v=0.8.4" />
+  <link rel="manifest" href="manifest.webmanifest?v=0.9.12" />
   <link rel="stylesheet" href="styles.css?v=0.9.11" />
   <link rel="stylesheet" href="fixes.css?v=0.6.1" />
   <link rel="stylesheet" href="insights.css?v=0.6.1" />
@@ -24,7 +24,7 @@
       <button class="brand" data-nav="home" aria-label="ホームへ">Reco</button>
       <div class="top-actions">
         <button id="syncBtn" class="icon-btn sync-btn" data-state="off" aria-label="端末間同期" title="端末間同期">☁︎</button>
-        <span class="version-badge" aria-label="現在のバージョン">v0.9.11</span>
+        <span class="version-badge" aria-label="現在のバージョン">v0.9.12</span>
         <button id="exportBtn" class="icon-btn" aria-label="データを書き出す" title="Export JSON">⇩</button>
       </div>
     </header>
@@ -53,7 +53,7 @@
 
   <script src="backup.js?v=0.8.1"></script>
   <script src="images.js?v=0.9.11"></script>
-  <script src="app.js?v=0.9.11"></script>
+  <script src="app.js?v=0.9.12"></script>
   <script src="fixes.js?v=0.9.6"></script>
   <script src="statusbar-fix.js?v=0.9.4"></script>
   <script src="insights.js?v=0.6.1"></script>
@@ -62,8 +62,30 @@
   <script src="activity-log-sync.js?v=0.7.2"></script>
   <script src="study-day-overrides.js?v=0.7.3"></script>
   <script src="plan.js?v=0.9.10"></script>
-  <script src="radical-ui.js?v=0.9.11"></script>
+  <script src="radical-ui.js?v=0.9.12"></script>
   <script src="radical-menu.js?v=0.9.10"></script>
   <script src="finish-modal-actions.js?v=0.8.6"></script>
+  <script>
+    // If a PWA update interrupts startup, reveal the existing records and a retry link.
+    setTimeout(() => {
+      const home = document.querySelector('#view-home.active');
+      if (!home || home.querySelector('.radical-surface')) return;
+      const style = document.createElement('style');
+      style.textContent = '#view-home.active > :not(.radical-surface){display:block!important}';
+      document.head.appendChild(style);
+      if (document.querySelector('#reco-startup-notice')) return;
+      const notice = document.createElement('div');
+      notice.id = 'reco-startup-notice';
+      notice.style.cssText = 'position:relative;z-index:100;padding:16px;margin:12px 0;color:#fff;background:#292c35;border-radius:12px;line-height:1.6';
+      const message = document.createElement('span');
+      message.textContent = '画面の読み込みが途中で止まりました。記録は消さずに再読み込みできます。 ';
+      const retry = document.createElement('a');
+      retry.textContent = '再読み込み';
+      retry.href = location.pathname + '?reload=' + Date.now();
+      retry.style.color = '#fff';
+      notice.append(message, retry);
+      home.prepend(notice);
+    }, 3000);
+  </script>
 </body>
 </html>
