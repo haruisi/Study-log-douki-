@@ -15,6 +15,13 @@
   const pad = n => String(n).padStart(2,'0');
   const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const esc = s => String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  // A stale or interrupted PWA update can load this file before images.js.
+  // Keep text records accessible even when the image helper is unavailable.
+  const images = () => window.RecoImages || {
+    pickerHTML: () => '', bindPicker: () => () => null,
+    imageHTML: reply => reply.imagePath ? '<span>添付画像を読み込めませんでした</span>' : '',
+    hydrate: () => {}
+  };
 
   function load(key, fallback){ try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); localStorage.setItem(RESOURCE_KEY, JSON.stringify(resources)); }
@@ -68,7 +75,7 @@
         <form id="activeReplyForm" style="display:grid;gap:8px;margin-top:16px">
           <label for="activeReplyInput" style="font-size:12px;font-weight:800;color:#c9ced9">途中経過・終わった内容</label>
           <textarea id="activeReplyInput" class="input" rows="2" placeholder="例：名問の森 〇番まで完了。残りは〜" style="resize:vertical;min-height:64px"></textarea>
-          ${window.RecoImages.pickerHTML()}
+          ${images().pickerHTML()}
           <button class="btn btn-primary" type="submit">記録に追加</button>
         </form>
       </div>` : `
@@ -84,7 +91,7 @@
     const activeReplyForm=$('#activeReplyForm',el);
     if(activeReplyForm){
       activeReplyForm.onclick=e=>e.stopPropagation();
-      const selectedImage=window.RecoImages.bindPicker(activeReplyForm);
+      const selectedImage=images().bindPicker(activeReplyForm);
       activeReplyForm.onsubmit=async e=>{
         e.preventDefault();
         const input=$('#activeReplyInput',el);
@@ -94,7 +101,7 @@
         const submit=activeReplyForm.querySelector('[type="submit"]');
         submit.disabled=true;
         let imagePath=null;
-        try { if(file) imagePath=await window.RecoImages.upload(file,active.id); }
+        try { if(file) imagePath=await images().upload(file,active.id); }
         catch(error) { toast(error.message || '画像を保存できませんでした'); submit.disabled=false; return; }
         active.replies=active.replies||[];
         active.replies.push({id:uid(),content,imagePath,createdAt:new Date().toISOString()});
@@ -190,13 +197,13 @@
       ${!s.endedAt?`<div class="card now-card"><div class="row between"><div><div class="eyebrow" style="color:#b5bbc8;margin:0 0 5px">NOW</div><b data-live-duration="${s.id}">現在 ${durationText(sessionMinutes(s))}</b></div><button class="btn btn-primary" data-finish="${s.id}">終了</button></div></div>`:''}
       ${s.note?`<div class="section-head"><h2>メモ</h2></div><div class="card note-box">${esc(s.note)}</div>`:''}
       <div class="section-head"><h2>Replies</h2><span>${(s.replies||[]).length}</span></div>
-      <div class="reply-list">${(s.replies||[]).length?(s.replies||[]).map(r=>`<div class="reply"><time>${fmtDate(r.createdAt)} ${fmtTime(r.createdAt)}</time>${r.content?`<p>${esc(r.content)}</p>`:''}${window.RecoImages.imageHTML(r)}</div>`).join(''):'<div class="empty">まだ返信はありません。</div>'}</div>
-      <form id="replyForm" class="reply-form"><div class="reply-compose"><input id="replyInput" class="input" placeholder="途中経過・ミス・気づき…" autocomplete="off">${window.RecoImages.pickerHTML()}</div><button class="btn btn-primary">送信</button></form>
+      <div class="reply-list">${(s.replies||[]).length?(s.replies||[]).map(r=>`<div class="reply"><time>${fmtDate(r.createdAt)} ${fmtTime(r.createdAt)}</time>${r.content?`<p>${esc(r.content)}</p>`:''}${images().imageHTML(r)}</div>`).join(''):'<div class="empty">まだ返信はありません。</div>'}</div>
+      <form id="replyForm" class="reply-form"><div class="reply-compose"><input id="replyInput" class="input" placeholder="途中経過・ミス・気づき…" autocomplete="off">${images().pickerHTML()}</div><button class="btn btn-primary">送信</button></form>
       <div class="danger-zone"><button id="deleteSession" class="btn btn-danger btn-block">この記録を削除</button></div>`;
     bindNav(el);
     const fb=$('[data-finish]',el); if(fb) fb.onclick=()=>finishModal(s.id);
     $('#editSession',el).onclick=()=>editSessionModal(s);
-    const replyForm=$('#replyForm',el), selectedImage=window.RecoImages.bindPicker(replyForm);
+    const replyForm=$('#replyForm',el), selectedImage=images().bindPicker(replyForm);
     replyForm.onsubmit=async e=>{
       e.preventDefault();
       const input=$('#replyInput',el), content=input.value.trim(), file=selectedImage();
@@ -204,13 +211,13 @@
       const submit=replyForm.querySelector('button[type="submit"], button.btn-primary');
       submit.disabled=true;
       let imagePath=null;
-      try { if(file) imagePath=await window.RecoImages.upload(file,s.id); }
+      try { if(file) imagePath=await images().upload(file,s.id); }
       catch(error) { toast(error.message || '画像を保存できませんでした'); submit.disabled=false; return; }
       s.replies=s.replies||[];
       s.replies.push({id:uid(),content,imagePath,createdAt:new Date().toISOString()});
       save(); renderDetail(); toast('返信を追加しました');
     };
-    window.RecoImages.hydrate(el);
+    images().hydrate(el);
     $('#deleteSession',el).onclick=()=>deleteModal(s);
   }
 
